@@ -1,0 +1,1 @@
+ALTER TABLE assessment_comment ADD COLUMN id_assessment_comment serial;

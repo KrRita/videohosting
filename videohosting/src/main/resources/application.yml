@@ -1,0 +1,20 @@
+server:
+  port: 8080
+spring:
+  servlet:
+    multipart:
+      max-file-size: 3GB
+      max-request-size: 3GB
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/ritube
+    username: postgres
+    password: Pushkin1799
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+videohosting:
+  app:
+    jwtSecret: mkd4SWKm45DJn87njddhfjksdhfkhsdjkfhsdbnsbsnbajasdasdasdsa
+    jwtExpirationMs: 300000
+    mediaRoot: C:\server\media\

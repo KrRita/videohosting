@@ -1,0 +1,1 @@
+ALTER TABLE Subscription DROP COLUMN subscription_date;

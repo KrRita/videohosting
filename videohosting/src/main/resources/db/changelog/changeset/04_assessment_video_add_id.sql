@@ -1,0 +1,1 @@
+ALTER TABLE Assessment_video ADD COLUMN id_assessment_video serial;

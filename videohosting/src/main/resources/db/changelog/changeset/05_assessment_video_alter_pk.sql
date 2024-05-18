@@ -1,0 +1,2 @@
+ALTER TABLE assessment_video DROP CONSTRAINT assessment_video_id_user_id_video_pk;
+ALTER TABLE assessment_video ADD CONSTRAINT assessment_video_id_assessment_video_pk PRIMARY KEY (id_assessment_video);

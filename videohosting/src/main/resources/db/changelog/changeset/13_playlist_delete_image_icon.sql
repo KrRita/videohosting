@@ -1,0 +1,1 @@
+ALTER TABLE playlist DROP COLUMN image_icon;

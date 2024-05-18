@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changeset/01_create_tables.sql
+  - include:
+      file: db/changelog/changeset/02_create_indexes.sql
+  - include:
+      file: db/changelog/changeset/03_alter_subscription_delete_date.sql
+  - include:
+      file: db/changelog/changeset/04_assessment_video_add_id.sql
+  - include:
+      file: db/changelog/changeset/05_assessment_video_alter_pk.sql
+  - include:
+      file: db/changelog/changeset/06_playlist_with_videos_add_id.sql
+  - include:
+      file: db/changelog/changeset/07_playlist_with_videos_alter_pk.sql
+  - include:
+      file: db/changelog/changeset/08_assessment_comment_add_id.sql
+  - include:
+      file: db/changelog/changeset/09_assessment_comment_alter_pk.sql
+  - include:
+      file: db/changelog/changeset/10_user_change_id_type.sql
+  - include:
+      file: db/changelog/changeset/11_video_delete_columns.sql
+  - include:
+      file: db/changelog/changeset/12_user_delete_columns.sql
+  - include:
+      file: db/changelog/changeset/13_playlist_delete_image_icon.sql
+
+
