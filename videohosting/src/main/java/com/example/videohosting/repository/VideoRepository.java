@@ -7,9 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
-    @Query(value = "SELECT v.id_video,v.id_user,v.video_name,v.duration,v.description,v.release_date_time, " +
-                   "v.video_url, v.preview_image" +
-                   " FROM User_ u1 JOIN Subscription s ON u1.id_user = s.id_user_subscriber " +
+    @Query(value = "SELECT v.id_video,v.id_user,v.video_name,v.duration,v.description,v.release_date_time " +
+                   "FROM User_ u1 JOIN Subscription s ON u1.id_user = s.id_user_subscriber " +
                    "JOIN Video v ON s.id_user_channel = v.id_user WHERE u1.id_user = :idUser",
             nativeQuery = true)
     List<Video>  getVideosByUser_IdUser(Long idUser);

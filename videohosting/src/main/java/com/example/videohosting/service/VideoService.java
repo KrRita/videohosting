@@ -92,7 +92,7 @@ public class VideoService {
         File file = new File(mediaRoot + videoPath );
         FrameGrab grab = FrameGrab.createFrameGrab(NIOUtils.readableChannel(file));
         Double duration = grab.getVideoTrack().getMeta().getTotalDuration();
-        savedVideo.setDuration(Duration.ofSeconds(duration.longValue()));
+        savedVideo.setDuration(duration.longValue());
         Video savedVideoWithDuration = videoRepository.save(savedVideo);
 
         VideoModel savedVideoModel = videoMapper.toModel(savedVideoWithDuration);

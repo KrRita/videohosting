@@ -14,7 +14,6 @@ import jakarta.persistence.Table;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "Video")
@@ -29,7 +28,7 @@ public class Video {
     @Column(name = "video_name")
     private String name;
     @Column(name = "duration")
-    private Duration duration;
+    private Long duration;
     @Column(name = "description")
     private String description;
     @Column(name = "release_date_time")
@@ -40,7 +39,7 @@ public class Video {
             inverseJoinColumns = @JoinColumn(name = "id_category"))
     private List<Category> categories;
 
-    public Video(Long idVideo, User user, String name, Duration duration, String description,
+    public Video(Long idVideo, User user, String name, Long duration, String description,
                  Timestamp releaseDateTime, List<Category> categories) {
         this.idVideo = idVideo;
         this.user = user;
@@ -84,11 +83,11 @@ public class Video {
         this.name = name;
     }
 
-    public Duration getDuration() {
+    public Long getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(Long duration) {
         this.duration = duration;
     }
 

@@ -18,3 +18,8 @@ videohosting:
     jwtSecret: mkd4SWKm45DJn87njddhfjksdhfkhsdjkfhsdbnsbsnbajasdasdasdsa
     jwtExpirationMs: 300000
     mediaRoot: C:\server\media\
+  testdatabase:
+    databaseName: ritubetest
+    userName: postgres
+    password: akSK58S75as
+

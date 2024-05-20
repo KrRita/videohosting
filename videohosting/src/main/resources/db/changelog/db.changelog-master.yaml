@@ -25,5 +25,7 @@ databaseChangeLog:
       file: db/changelog/changeset/12_user_delete_columns.sql
   - include:
       file: db/changelog/changeset/13_playlist_delete_image_icon.sql
+  - include:
+      file: db/changelog/changeset/14_video_alter_duration.sql
 
 

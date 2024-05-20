@@ -17,7 +17,7 @@ public class PreviewVideoResponse {
     @NotBlank
     @Size(max = 70)
     private String name;
-    private Duration duration;
+    private Long duration;
     @NotBlank
     @Size(max = 1000)
     private String description;
@@ -35,7 +35,7 @@ public class PreviewVideoResponse {
     @Size(max = 40)
     private String userName;
 
-    public PreviewVideoResponse(Long idVideo, String name, Duration duration, String description, Resource previewImage,
+    public PreviewVideoResponse(Long idVideo, String name, Long duration, String description, Resource previewImage,
                                 Timestamp releaseDateTime, Long countViewing, Long idUser, String userName) {
         this.idVideo = idVideo;
         this.name = name;
@@ -67,11 +67,11 @@ public class PreviewVideoResponse {
         this.name = name;
     }
 
-    public Duration getDuration() {
+    public Long getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(Long duration) {
         this.duration = duration;
     }
 

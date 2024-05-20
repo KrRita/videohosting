@@ -22,7 +22,7 @@ public class VideoResponse {
     @NotBlank
     @Size(max = 70)
     private String name;
-    private Duration duration;
+    private Long duration;
     @NotBlank
     @Size(max = 1000)
     private String description;
@@ -44,7 +44,7 @@ public class VideoResponse {
     private Long countDislikes;
 
     public VideoResponse(Long idVideo, PreviewUserResponse previewUserResponse, String name,
-                         Duration duration, String description, Timestamp releaseDateTime,
+                         Long duration, String description, Timestamp releaseDateTime,
                          Resource videoFile, List<String> categories, Long countViewing, Long countLikes,
                          Long countDislikes) {
         this.idVideo = idVideo;
@@ -87,11 +87,11 @@ public class VideoResponse {
         this.name = name;
     }
 
-    public Duration getDuration() {
+    public Long getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(Long duration) {
         this.duration = duration;
     }
 

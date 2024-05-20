@@ -9,7 +9,7 @@ public class VideoModel {
     private Long idVideo;
     private UserModel user;
     private String name;
-    private Duration duration;
+    private Long duration;
     private String description;
     private Timestamp releaseDateTime;
     private List<String> categories;
@@ -17,7 +17,7 @@ public class VideoModel {
     private Long countLikes;
     private Long countDislikes;
 
-    public VideoModel(Long idVideo, UserModel user, String name, Duration duration,
+    public VideoModel(Long idVideo, UserModel user, String name, Long duration,
                       String description, Timestamp releaseDateTime, List<String> categories,
                       Long countViewing, Long countLikes, Long countDislikes) {
         this.idVideo = idVideo;
@@ -59,11 +59,11 @@ public class VideoModel {
         this.name = name;
     }
 
-    public Duration getDuration() {
+    public Long getDuration() {
         return duration;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(Long duration) {
         this.duration = duration;
     }
 
