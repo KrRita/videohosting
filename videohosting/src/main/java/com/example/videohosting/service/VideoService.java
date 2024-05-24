@@ -89,10 +89,8 @@ public class VideoService {
         String videoPath = "video\\" + savedVideo.getIdVideo() + ".mp4";
         mediaService.saveMedia(videoFile, videoPath);
 
-        File file = new File(mediaRoot + videoPath );
-        FrameGrab grab = FrameGrab.createFrameGrab(NIOUtils.readableChannel(file));
-        Double duration = grab.getVideoTrack().getMeta().getTotalDuration();
-        savedVideo.setDuration(duration.longValue());
+        Long duration = mediaService.getDuration(videoPath);
+        savedVideo.setDuration(duration);
         Video savedVideoWithDuration = videoRepository.save(savedVideo);
 
         VideoModel savedVideoModel = videoMapper.toModel(savedVideoWithDuration);
@@ -182,7 +180,7 @@ public class VideoService {
     public List<VideoModel> getVideosByName(String name) {
         List<Video> videos = videoRepository.findByNameContaining(name);
         List<VideoModel> videoModels = videoServiceUtils.getVideoModelListWithCategories(videos);
-        return videoServiceUtils.addFieldInModelList(videoMapper.toModelList(videos));
+        return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
     public List<VideoModel> getVideosByUserName(String name) {

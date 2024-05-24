@@ -2,12 +2,16 @@ package com.example.videohosting.service;
 
 import com.example.videohosting.exception.DeleteFileException;
 import com.example.videohosting.exception.LoadFileException;
+import org.jcodec.api.FrameGrab;
+import org.jcodec.api.JCodecException;
+import org.jcodec.common.io.NIOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -49,5 +53,12 @@ public class MediaService {
         } catch (IOException ex) {
             throw new DeleteFileException("The file could not be deleted");
         }
+    }
+
+    public Long getDuration(String videoPath) throws IOException, JCodecException {
+        File file = new File(mediaRoot + videoPath );
+        FrameGrab grab = FrameGrab.createFrameGrab(NIOUtils.readableChannel(file));
+        Double duration = grab.getVideoTrack().getMeta().getTotalDuration();
+        return duration.longValue();
     }
 }
