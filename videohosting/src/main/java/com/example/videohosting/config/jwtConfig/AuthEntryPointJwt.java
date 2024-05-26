@@ -1,4 +1,4 @@
-package com.example.videohosting.jwtConfig;
+package com.example.videohosting.config.jwtConfig;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

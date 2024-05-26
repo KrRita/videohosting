@@ -3,7 +3,7 @@ package com.example.videohosting.controller;
 import com.example.videohosting.dto.jwtResponse.JwtResponse;
 import com.example.videohosting.dto.userDto.CreateUserRequest;
 import com.example.videohosting.dto.userDto.UserLogInRequest;
-import com.example.videohosting.jwtConfig.JwtUtils;
+import com.example.videohosting.config.jwtConfig.JwtUtils;
 import com.example.videohosting.mapper.userMapper.UserMapper;
 import com.example.videohosting.model.UserModel;
 import com.example.videohosting.service.MediaService;

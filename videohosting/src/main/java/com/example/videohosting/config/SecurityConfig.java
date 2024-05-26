@@ -1,7 +1,7 @@
 package com.example.videohosting.config;
 
-import com.example.videohosting.jwtConfig.AuthEntryPointJwt;
-import com.example.videohosting.jwtConfig.AuthTokenFilter;
+import com.example.videohosting.config.jwtConfig.AuthEntryPointJwt;
+import com.example.videohosting.config.jwtConfig.AuthTokenFilter;
 import com.example.videohosting.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

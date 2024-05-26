@@ -19,19 +19,18 @@ import com.example.videohosting.repository.AssessmentVideoRepository;
 import com.example.videohosting.repository.PlaylistWithVideosRepository;
 import com.example.videohosting.repository.VideoRepository;
 import com.example.videohosting.repository.ViewedVideoRepository;
-import org.jcodec.api.FrameGrab;
 import org.jcodec.api.JCodecException;
-import org.jcodec.common.io.NIOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -49,9 +48,7 @@ public class VideoService {
     private final PlaylistWithVideosMapper playlistWithVideosMapper;
     private final VideoServiceUtils videoServiceUtils;
     private final MediaService mediaService;
-
-    @Value("${videohosting.app.mediaRoot}")
-    private String mediaRoot;
+    private final Logger logger = LoggerFactory.getLogger(VideoService.class);
 
     @Autowired
     public VideoService(VideoRepository videoRepository, VideoMapper videoMapper,
@@ -74,8 +71,11 @@ public class VideoService {
     }
 
 
+    @CachePut(value = "videos", key = "#result.idVideo")
     public VideoModel insertVideo(VideoModel videoModel, MultipartFile videoFile, MultipartFile preview) throws IOException, JCodecException {
+        logger.info("Inserting video: {}", videoModel.getName());
         if (videoFile == null) {
+            logger.error("File upload error: video file is null");
             throw new LoadFileException("File upload error");
         }
         videoModel.setReleaseDateTime(Timestamp.valueOf(LocalDateTime.now()));
@@ -85,9 +85,11 @@ public class VideoService {
         if (preview != null) {
             String path = "previewVideo\\" + savedVideo.getIdVideo() + ".jpeg";
             mediaService.saveMedia(preview, path);
+            logger.info("Saved image preview for video at path: {}", path);
         }
         String videoPath = "video\\" + savedVideo.getIdVideo() + ".mp4";
         mediaService.saveMedia(videoFile, videoPath);
+        logger.info("Saved video at path: {}", videoPath);
 
         Long duration = mediaService.getDuration(videoPath);
         savedVideo.setDuration(duration);
@@ -100,21 +102,31 @@ public class VideoService {
         savedVideoModel.setCountViewing(count);
         savedVideoModel.setCountDislikes(count);
         savedVideoModel.setCountLikes(count);
+        logger.info("Video inserted: {}", savedVideoModel.getIdVideo());
         return savedVideoModel;
     }
 
+    @CachePut(value = "videos", key = "#result.idVideo")
     public VideoModel updateVideo(VideoModel videoModel, MultipartFile previewImage) {
+        logger.info("Updating video: {}", videoModel.getIdVideo());
         Video newVideo = videoMapper.toEntity(videoModel);
-        Video oldVideo = videoRepository.findById(videoModel.getIdVideo()).orElseThrow(() -> new NotFoundException("Video not found"));
+        Video oldVideo = videoRepository.findById(videoModel.getIdVideo())
+                .orElseThrow(() -> {
+                    logger.error("Video with id {} not found", videoModel.getIdVideo());
+                    return new NotFoundException("Video not found");
+                });
         if (newVideo.getName() != null) {
             oldVideo.setName(newVideo.getName());
+            logger.info("Updated video name to: {}", newVideo.getName());
         }
         if (newVideo.getDescription() != null) {
             oldVideo.setDescription(newVideo.getDescription());
+            logger.info("Updated description to: {}", newVideo.getDescription());
         }
         if (previewImage != null) {
             String path = "previewVideo\\" + oldVideo.getIdVideo() + ".jpeg";
             mediaService.saveMedia(previewImage, path);
+            logger.info("Update image preview for video at path: {}", path);
         }
         Video savedVideo = videoRepository.save(oldVideo);
         VideoModel savedVideoModel = videoMapper.toModel(savedVideo);
@@ -126,19 +138,29 @@ public class VideoService {
         savedVideoModel.setCountLikes(countLikes);
         Long countDislikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false);
         savedVideoModel.setCountDislikes(countDislikes);
+        logger.info("Video updated: {}", savedVideoModel.getIdVideo());
         return savedVideoModel;
     }
 
+    @CacheEvict(value = "videos", key = "#id")
     public void deleteVideo(Long id) {
+        logger.info("Deleting video: {}", id);
         String videoPath = "video\\" + id + ".mp4";
         String previewPath = "previewVideo\\" + id + ".jpeg";
         videoRepository.deleteById(id);
         mediaService.deleteMedia(videoPath);
         mediaService.deleteMedia(previewPath);
+        logger.info("Video and associated media deleted with id: {}", id);
     }
 
+    @Cacheable(value = "videos", key = "#id")
     public VideoModel findVideoById(Long id) {
-        Video video = videoRepository.findById(id).orElseThrow(() -> new NotFoundException("Video not found"));
+        logger.info("Finding video by id: {}", id);
+        Video video = videoRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Video with id {} not found", id);
+                    return new NotFoundException("Video not found");
+                });
         Long countViews = viewedVideoRepository.countViewedVideosByVideo_IdVideo(id);
         Long countLikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, true);
         Long countDislikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, false);
@@ -147,16 +169,20 @@ public class VideoService {
         videoModel.setCountLikes(countLikes);
         videoModel.setCountDislikes(countDislikes);
         videoModel.setCategories(videoServiceUtils.toCategoryStringList(video.getCategories()));
+        logger.info("Video found: {}", id);
         return videoModel;
     }
 
     public List<VideoModel> getSubscriptionsVideos(Long idUser) {
+        logger.info("Getting subscription videos for user: {}", idUser);
         List<Video> videos = videoRepository.getVideosByUser_IdUser(idUser);
         List<VideoModel> videoModels = videoServiceUtils.getVideoModelListWithCategories(videos);
+        logger.info("Subscriptions videos retrieved for user: {}", idUser);
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
     public List<ViewedVideoModel> getViewedVideos(Long idUser) {
+        logger.info("Getting viewed videos for user: {}", idUser);
         List<ViewedVideo> viewedVideos = viewedVideoRepository.getViewedVideosByIdUser(idUser);
         List<ViewedVideoModel> viewedVideoModels = viewedVideoMapper.toModelList(viewedVideos);
         for (ViewedVideoModel viewedVideoModel : viewedVideoModels) {
@@ -174,57 +200,76 @@ public class VideoService {
             List<Category> categories = viewedVideoIterator.next().getVideo().getCategories();
             viewedVideoModelIterator.next().getVideo().setCategories(videoServiceUtils.toCategoryStringList(categories));
         }
+        logger.info("Viewed videos retrieved for user: {}", idUser);
         return viewedVideoModels;
     }
 
     public List<VideoModel> getVideosByName(String name) {
+        logger.info("Getting videos by name: {}", name);
         List<Video> videos = videoRepository.findByNameContaining(name);
         List<VideoModel> videoModels = videoServiceUtils.getVideoModelListWithCategories(videos);
+        logger.info("Videos retrieved by name: {}", name);
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
     public List<VideoModel> getVideosByUserName(String name) {
+        logger.info("Getting videos by user name: {}", name);
         List<Video> videos = videoRepository.findByUser_ChannelNameContaining(name);
         List<VideoModel> videoModels = videoServiceUtils.getVideoModelListWithCategories(videos);
+        logger.info("Videos retrieved by user name: {}", name);
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
     public List<VideoModel> getVideosByCategories(List<String> categories) {
+        logger.info("Getting videos by categories: {}", categories);
         List<Video> videos = videoRepository.findDistinctByCategories_NameIn(categories);
         List<VideoModel> videoModels = videoServiceUtils.getVideoModelListWithCategories(videos);
+        logger.info("Videos retrieved by categories: {}", categories);
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
+    @CacheEvict(value = "videos", key = "#assessmentVideoModel.video.idVideo")
     public VideoModel insertAssessmentVideo(AssessmentVideoModel assessmentVideoModel) {
+        logger.info("Inserting assessment video: {}", assessmentVideoModel);
         AssessmentVideo assessmentVideo = assessmentVideoMapper.toEntity(assessmentVideoModel);
         assessmentVideo.setDateOfAssessment(Timestamp.valueOf(LocalDateTime.now()));
         assessmentVideoRepository.save(assessmentVideo);
+        logger.info("Assessment video inserted successfully");
         return findVideoById(assessmentVideoModel.getVideo().getIdVideo());
     }
 
+    @CacheEvict(value = "videos", key = "#idVideo")
     public VideoModel deleteAssessmentVideo(Long idUser, Long idVideo) {
+        logger.info("Deleting assessment video for user ID: {} and video ID: {}", idUser, idVideo);
         Long id = assessmentVideoRepository.getAssessmentVideoByIdUserAndVideo_IdVideo(idUser, idVideo);
         assessmentVideoRepository.deleteById(id);
+        logger.info("Deleted assessment video with ID: {} successfully", id);
         return findVideoById(idVideo);
     }
 
     public VideoModel insertViewedVideo(ViewedVideoModel viewedVideoModel) {
+        logger.info("Inserting viewed video: {}", viewedVideoModel);
         ViewedVideo viewedVideo = viewedVideoMapper.toEntity(viewedVideoModel);
         viewedVideo.setDateOfViewing(Timestamp.valueOf(LocalDateTime.now()));
         viewedVideoRepository.save(viewedVideo);
+        logger.info("Viewed video inserted successfully");
         return findVideoById(viewedVideoModel.getVideo().getIdVideo());
     }
 
     public List<VideoModel> getLikedVideos(Long idUser) {
-        List<AssessmentVideo> assessmentVideos = assessmentVideoRepository.getAssessmentVideoByIdUserAndLiked(idUser, true);
+        logger.info("Getting liked videos of user with id: {}", idUser);
+        List<AssessmentVideo> assessmentVideos =
+                assessmentVideoRepository.getAssessmentVideoByIdUserAndLiked(idUser, true);
         List<Video> videos = new ArrayList<>();
         assessmentVideos
                 .forEach(assessmentVideo -> videos.add(assessmentVideo.getVideo()));
         List<VideoModel> videoModels = videoServiceUtils.getVideoModelListWithCategories(videos);
+        logger.info("Videos retrieved by according to the user's assessment with id: {}", idUser);
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
     public List<PlaylistWithVideosModel> getVideosFromPlaylist(Long idPlaylist) {
+        logger.info("Getting videos from playlist with id: {}", idPlaylist);
         List<PlaylistWithVideos> playlistWithVideos =
                 playlistWithVideosRepository.getPlaylistWithVideosByIdPlaylist(idPlaylist);
         List<PlaylistWithVideosModel> playlistWithVideosModels =
@@ -244,20 +289,25 @@ public class VideoService {
             videoModel.setCountLikes(countLikes);
             videoModel.setCountDislikes(countDislikes);
         }
+        logger.info("Videos retrieved from playlist with id: {}", idPlaylist);
         return playlistWithVideosModels;
     }
 
     public List<PlaylistWithVideosModel> insertPlaylistWithVideos(PlaylistWithVideosModel playlistWithVideosModel) {
+        logger.info("Inserting video in playlist: {}", playlistWithVideosModel);
         PlaylistWithVideos playlistWithVideos = playlistWithVideosMapper.toEntity(playlistWithVideosModel);
         playlistWithVideos.setDateOfAddition(Timestamp.valueOf(LocalDateTime.now()));
         playlistWithVideosRepository.save(playlistWithVideos);
+        logger.info("Inserted video in playlist successfully");
         return getVideosFromPlaylist(playlistWithVideosModel.getIdPlaylist());
     }
 
     public List<PlaylistWithVideosModel> deletePlaylistWithVideos(Long idPlaylist, Long idVideo) {
+        logger.info("Deleting video from playlist for playlist ID: {} and video ID: {}", idPlaylist, idVideo);
         Long id = playlistWithVideosRepository
                 .getPlaylistWithVideosByIdPlaylistAndVideo_IdVideo(idPlaylist, idVideo);
         playlistWithVideosRepository.deleteById(id);
+        logger.info("Deleted video from playlist with entity ID : {} successfully", id);
         return getVideosFromPlaylist(idPlaylist);
     }
 }

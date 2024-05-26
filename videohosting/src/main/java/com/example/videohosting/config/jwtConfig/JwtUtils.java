@@ -1,4 +1,4 @@
-package com.example.videohosting.jwtConfig;
+package com.example.videohosting.config.jwtConfig;
 
 import com.example.videohosting.model.UserModel;
 import io.jsonwebtoken.ExpiredJwtException;
