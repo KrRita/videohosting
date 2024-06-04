@@ -6,18 +6,23 @@ import com.example.videohosting.dto.playlistDto.UpdatePlaylistRequest;
 import com.example.videohosting.dto.playlistWithVideosDto.CreatePlaylistWithVideosRequest;
 import com.example.videohosting.dto.playlistWithVideosDto.DeletePlaylistWithVideosRequest;
 import com.example.videohosting.dto.playlistWithVideosDto.PlaylistWithVideosResponse;
+import com.example.videohosting.exception.LoadFileException;
 import com.example.videohosting.mapper.PlaylistMapper;
 import com.example.videohosting.mapper.PlaylistWithVideosMapper;
 import com.example.videohosting.model.PlaylistModel;
 import com.example.videohosting.model.PlaylistWithVideosModel;
+import com.example.videohosting.model.UserModel;
+import com.example.videohosting.model.VideoModel;
 import com.example.videohosting.service.MediaService;
 import com.example.videohosting.service.PlaylistService;
+import com.example.videohosting.service.UserService;
 import com.example.videohosting.service.VideoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,23 +42,28 @@ public class PlaylistController {
     private final VideoService videoService;
     private final PlaylistWithVideosMapper playlistWithVideosMapper;
     private final MediaService mediaService;
+    private final UserService userService;
 
     @Autowired
     public PlaylistController(PlaylistService playlistService, PlaylistMapper playlistMapper,
                               VideoService videoService, PlaylistWithVideosMapper playlistWithVideosMapper,
-                              MediaService mediaService) {
+                              MediaService mediaService, UserService userService) {
         this.playlistService = playlistService;
         this.playlistMapper = playlistMapper;
         this.videoService = videoService;
         this.playlistWithVideosMapper = playlistWithVideosMapper;
         this.mediaService = mediaService;
+        this.userService = userService;
     }
 
     @PostMapping()
+    @Transactional
     public ResponseEntity<PlaylistResponse> postPlaylist(@Valid @RequestBody CreatePlaylistRequest request) {
-        PlaylistModel playlistModel = playlistService.insert(playlistMapper.toModelFromCreateRequest(request),
-                request.getImageIconFile());
-        PlaylistResponse response = playlistMapper.toResponseFromModel(playlistModel);
+        PlaylistModel playlistModel = playlistMapper.toModelFromCreateRequest(request);
+        UserModel userModel = userService.findUserById(playlistModel.getUser().getIdUser());
+        playlistModel.setUser(userModel);
+        PlaylistModel playlistResult = playlistService.insert(playlistModel, request.getImageIconFile());
+        PlaylistResponse response = playlistMapper.toResponseFromModel(playlistResult);
         addPlaylistIcon(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -69,9 +79,9 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity.BodyBuilder deletePlaylist(@PathVariable Long id) {
+    public ResponseEntity<?> deletePlaylist(@PathVariable Long id) {
         playlistService.delete(id);
-        return ResponseEntity.status(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/{id}")
@@ -91,10 +101,13 @@ public class PlaylistController {
     }
 
     @PostMapping("/{idPlaylist}/videos")
+    @Transactional
     public ResponseEntity<List<PlaylistWithVideosResponse>> addVideoInPlaylist
             (@PathVariable Long idPlaylist, @Valid @RequestBody CreatePlaylistWithVideosRequest request) {
         PlaylistWithVideosModel model = playlistWithVideosMapper.toModelFromCreateRequest(request);
+        VideoModel videoModel = videoService.findVideoById(request.getIdVideo());
         model.setIdPlaylist(idPlaylist);
+        model.setVideo(videoModel);
         List<PlaylistWithVideosModel> models = videoService.insertPlaylistWithVideos(model);
         List<PlaylistWithVideosResponse> responses = playlistWithVideosMapper.toListResponseFromListModel(models);
         addVideoPreview(responses);
@@ -113,14 +126,22 @@ public class PlaylistController {
     private void addVideoPreview(List<PlaylistWithVideosResponse> responses) {
         for (PlaylistWithVideosResponse response : responses) {
             String previewPath = "previewVideo\\" + response.getPreviewVideoResponse().getIdVideo() + ".jpeg";
-            Resource preview = mediaService.getMedia(previewPath);
-            response.getPreviewVideoResponse().setPreviewImage(preview);
+            try {
+                Resource preview = mediaService.getMedia(previewPath);
+                response.getPreviewVideoResponse().setPreviewImage(preview);
+            } catch (LoadFileException ex) {
+                response.getPreviewVideoResponse().setPreviewImage(null);
+            }
         }
     }
 
     private void addPlaylistIcon(PlaylistResponse response) {
         String imagePath = "imageIconPlaylist\\" + response.getIdPlaylist() + ".jpeg";
-        Resource image = mediaService.getMedia(imagePath);
-        response.setImageIcon(image);
+        try {
+            Resource image = mediaService.getMedia(imagePath);
+            response.setImageIcon(image);
+        } catch (LoadFileException ex) {
+            response.setImageIcon(null);
+        }
     }
 }

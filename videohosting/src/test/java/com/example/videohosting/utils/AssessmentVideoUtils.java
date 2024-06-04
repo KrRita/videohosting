@@ -1,9 +1,9 @@
-package com.example.videohosting.repository.utils;
+package com.example.videohosting.utils;
 
-import com.example.videohosting.entity.Comment;
+import com.example.videohosting.entity.AssessmentVideo;
 import com.example.videohosting.entity.User;
 import com.example.videohosting.entity.Video;
-import com.example.videohosting.repository.CommentRepository;
+import com.example.videohosting.repository.AssessmentVideoRepository;
 import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +13,18 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Component
-public class CommentUtils {
+public class AssessmentVideoUtils {
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private CommentRepository commentRepository;
+
     @Autowired
     private VideoRepository videoRepository;
 
-    public Comment createAndSaveComment() {
+    @Autowired
+    private AssessmentVideoRepository assessmentVideoRepository;
+
+
+    public AssessmentVideo createAndSaveAssessmentVideo() {
         User user = new User();
         user.setEmail("testuser@example.com");
         user.setChannelName("Test Channel");
@@ -42,17 +45,17 @@ public class CommentUtils {
         video.setCategories(List.of());
         video = videoRepository.save(video);
 
-        Comment comment = new Comment();
-        comment.setIdVideo(video.getIdVideo());
-        comment.setUser(user);
-        comment.setText("Test Comment");
-        comment.setReleaseDateTime(new Timestamp(System.currentTimeMillis()));
-        return commentRepository.save(comment);
+        AssessmentVideo assessmentVideo = new AssessmentVideo();
+        assessmentVideo.setIdUser(user.getIdUser());
+        assessmentVideo.setVideo(video);
+        assessmentVideo.setDateOfAssessment(new Timestamp(System.currentTimeMillis()));
+        assessmentVideo.setLiked(true);
+        return assessmentVideoRepository.save(assessmentVideo);
     }
+
     public void tearDown() {
-        commentRepository.deleteAll();
+        assessmentVideoRepository.deleteAll();
         videoRepository.deleteAll();
         userRepository.deleteAll();
     }
-
 }

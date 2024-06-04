@@ -1,11 +1,9 @@
-package com.example.videohosting.repository.utils;
+package com.example.videohosting.utils;
 
-import com.example.videohosting.entity.Playlist;
-import com.example.videohosting.entity.PlaylistWithVideos;
+import com.example.videohosting.entity.Comment;
 import com.example.videohosting.entity.User;
 import com.example.videohosting.entity.Video;
-import com.example.videohosting.repository.PlaylistRepository;
-import com.example.videohosting.repository.PlaylistWithVideosRepository;
+import com.example.videohosting.repository.CommentRepository;
 import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +13,15 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Component
-public class PlaylistWithVideosUtils {
+public class CommentUtils {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private PlaylistRepository playlistRepository;
+    private CommentRepository commentRepository;
     @Autowired
     private VideoRepository videoRepository;
-    @Autowired
-    private PlaylistWithVideosRepository playlistWithVideosRepository;
 
-    public PlaylistWithVideos createAndSavePlaylistWithVideos() {
+    public Comment createAndSaveComment() {
         User user = new User();
         user.setEmail("testuser@example.com");
         user.setChannelName("Test Channel");
@@ -46,21 +42,15 @@ public class PlaylistWithVideosUtils {
         video.setCategories(List.of());
         video = videoRepository.save(video);
 
-        Playlist playlist = new Playlist();
-        playlist.setUser(user);
-        playlist.setNamePlaylist("Test Playlist");
-        playlist.setDateCreation(new Timestamp(System.currentTimeMillis()));
-        playlist = playlistRepository.save(playlist);
-
-        PlaylistWithVideos playlistWithVideos = new PlaylistWithVideos();
-        playlistWithVideos.setIdPlaylist(playlist.getIdPlaylist());
-        playlistWithVideos.setVideo(video);
-        playlistWithVideos.setDateOfAddition(new Timestamp(System.currentTimeMillis()));
-        return playlistWithVideosRepository.save(playlistWithVideos);
+        Comment comment = new Comment();
+        comment.setIdVideo(video.getIdVideo());
+        comment.setUser(user);
+        comment.setText("Test Comment");
+        comment.setReleaseDateTime(new Timestamp(System.currentTimeMillis()));
+        return commentRepository.save(comment);
     }
     public void tearDown() {
-        playlistWithVideosRepository.deleteAll();
-        playlistRepository.deleteAll();
+        commentRepository.deleteAll();
         videoRepository.deleteAll();
         userRepository.deleteAll();
     }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 public class PlaylistWithVideosResponse {
     @NotNull
@@ -37,23 +38,6 @@ public class PlaylistWithVideosResponse {
         this.dateOfAddition = dateOfAddition;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PlaylistWithVideosResponse that = (PlaylistWithVideosResponse) o;
-
-        if (!previewVideoResponse.equals(that.previewVideoResponse)) return false;
-        return dateOfAddition.equals(that.dateOfAddition);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = previewVideoResponse.hashCode();
-        result = 31 * result + dateOfAddition.hashCode();
-        return result;
-    }
 
     @Override
     public String toString() {
@@ -61,5 +45,24 @@ public class PlaylistWithVideosResponse {
                "previewVideoResponse=" + previewVideoResponse +
                ", dateOfAddition=" + dateOfAddition +
                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PlaylistWithVideosResponse that = (PlaylistWithVideosResponse) o;
+
+        if (!Objects.equals(previewVideoResponse, that.previewVideoResponse))
+            return false;
+        return Objects.equals(dateOfAddition, that.dateOfAddition);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = previewVideoResponse != null ? previewVideoResponse.hashCode() : 0;
+        result = 31 * result + (dateOfAddition != null ? dateOfAddition.hashCode() : 0);
+        return result;
     }
 }

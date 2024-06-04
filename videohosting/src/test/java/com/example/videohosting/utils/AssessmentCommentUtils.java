@@ -1,9 +1,11 @@
-package com.example.videohosting.repository.utils;
+package com.example.videohosting.utils;
 
-import com.example.videohosting.entity.AssessmentVideo;
+import com.example.videohosting.entity.AssessmentComment;
+import com.example.videohosting.entity.Comment;
 import com.example.videohosting.entity.User;
 import com.example.videohosting.entity.Video;
-import com.example.videohosting.repository.AssessmentVideoRepository;
+import com.example.videohosting.repository.AssessmentCommentRepository;
+import com.example.videohosting.repository.CommentRepository;
 import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +15,17 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Component
-public class AssessmentVideoUtils {
+public class AssessmentCommentUtils {
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private VideoRepository videoRepository;
-
     @Autowired
-    private AssessmentVideoRepository assessmentVideoRepository;
+    private CommentRepository commentRepository;
+    @Autowired
+    private AssessmentCommentRepository assessmentCommentRepository;
 
-
-    public AssessmentVideo createAndSaveAssessmentVideo() {
+    public AssessmentComment createAndSaveAssessmentComment() {
         User user = new User();
         user.setEmail("testuser@example.com");
         user.setChannelName("Test Channel");
@@ -39,23 +40,31 @@ public class AssessmentVideoUtils {
         Video video = new Video();
         video.setUser(user);
         video.setName("Test Video");
-        video.setDuration(600L);
+        video.setDuration(100L);
         video.setDescription("Test Description");
         video.setReleaseDateTime(new Timestamp(System.currentTimeMillis()));
         video.setCategories(List.of());
         video = videoRepository.save(video);
 
-        AssessmentVideo assessmentVideo = new AssessmentVideo();
-        assessmentVideo.setIdUser(user.getIdUser());
-        assessmentVideo.setVideo(video);
-        assessmentVideo.setDateOfAssessment(new Timestamp(System.currentTimeMillis()));
-        assessmentVideo.setLiked(true);
-        return assessmentVideoRepository.save(assessmentVideo);
+        Comment comment = new Comment();
+        comment.setIdVideo(video.getIdVideo());
+        comment.setUser(user);
+        comment.setText("Test Comment");
+        comment.setReleaseDateTime(new Timestamp(System.currentTimeMillis()));
+        comment = commentRepository.save(comment);
+
+        AssessmentComment assessmentComment = new AssessmentComment();
+        assessmentComment.setIdUser(user.getIdUser());
+        assessmentComment.setIdComment(comment.getIdComment());
+        assessmentComment.setLiked(true);
+        return assessmentCommentRepository.save(assessmentComment);
     }
 
     public void tearDown() {
-        assessmentVideoRepository.deleteAll();
+        assessmentCommentRepository.deleteAll();
+        commentRepository.deleteAll();
         videoRepository.deleteAll();
         userRepository.deleteAll();
     }
+
 }

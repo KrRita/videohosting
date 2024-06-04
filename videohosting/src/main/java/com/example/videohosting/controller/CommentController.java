@@ -9,11 +9,14 @@ import com.example.videohosting.mapper.AssessmentCommentMapper;
 import com.example.videohosting.mapper.CommentMapper;
 import com.example.videohosting.model.AssessmentCommentModel;
 import com.example.videohosting.model.CommentModel;
+import com.example.videohosting.model.UserModel;
 import com.example.videohosting.service.CommentService;
+import com.example.videohosting.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,19 +32,25 @@ public class CommentController {
     private final CommentService commentService;
     private final CommentMapper commentMapper;
     private final AssessmentCommentMapper assessmentCommentMapper;
+    private final UserService userService;
 
     @Autowired
     public CommentController(CommentService commentService, CommentMapper commentMapper,
-                             AssessmentCommentMapper assessmentCommentMapper) {
+                             AssessmentCommentMapper assessmentCommentMapper, UserService userService) {
         this.commentService = commentService;
         this.commentMapper = commentMapper;
         this.assessmentCommentMapper = assessmentCommentMapper;
+        this.userService = userService;
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<CommentResponse> postComment(@Valid @RequestBody CreateCommentRequest request) {
-        CommentModel model = commentService.insertComment(commentMapper.toModelFromCreateRequest(request));
-        CommentResponse response = commentMapper.toResponseFromModel(model);
+        CommentModel commentModel = commentMapper.toModelFromCreateRequest(request);
+        UserModel userModel = userService.findUserById(request.getIdUser());
+        commentModel.setUser(userModel);
+        CommentModel result = commentService.insertComment(commentModel);
+        CommentResponse response = commentMapper.toResponseFromModel(result);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -55,9 +64,9 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity.BodyBuilder deleteComment(@PathVariable Long id) {
+    public ResponseEntity<?> deleteComment(@PathVariable Long id) {
         commentService.deleteComment(id);
-        return ResponseEntity.status(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/{id}")

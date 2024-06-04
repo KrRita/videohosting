@@ -1,6 +1,7 @@
 package com.example.videohosting.service;
 
 import com.example.videohosting.entity.User;
+import com.example.videohosting.exception.DeleteFileException;
 import com.example.videohosting.exception.NotFoundException;
 import com.example.videohosting.exception.UserAlreadyExistsException;
 import com.example.videohosting.mapper.userMapper.UserMapper;
@@ -14,6 +15,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
@@ -37,6 +39,7 @@ public class UserService {
         this.mediaService = mediaService;
     }
 
+    @Transactional
     @CachePut(value = "users", key = "#result.idUser")
     public UserModel insert(UserModel userModel, MultipartFile imageHeader, MultipartFile imageIcon) {
         logger.info("Inserting new user: {}", userModel.getEmail());
@@ -147,9 +150,19 @@ public class UserService {
         String iconPath = "imageIconUser\\" + id + ".jpeg";
         String headerPath = "imageHeaderUser\\" + id + ".jpeg";
         userRepository.deleteById(id);
-        mediaService.deleteMedia(iconPath);
-        mediaService.deleteMedia(headerPath);
-        logger.info("User and associated media deleted with id: {}", id);
+        logger.info("User deleted with id: {}", id);
+        try {
+            mediaService.deleteMedia(iconPath);
+            logger.info("Associated media deleted");
+        } catch (DeleteFileException ex) {
+            logger.warn("Failed to delete associated media");
+        }
+        try {
+            mediaService.deleteMedia(headerPath);
+            logger.info("Associated media deleted");
+        } catch (DeleteFileException ex) {
+            logger.warn("Failed to delete associated media");
+        }
     }
 
     @Cacheable(value = "users", key = "#id")

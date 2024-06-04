@@ -1,10 +1,7 @@
 package com.example.videohosting.repository;
 
 import com.example.videohosting.entity.AssessmentComment;
-import com.example.videohosting.entity.Comment;
-import com.example.videohosting.entity.User;
-import com.example.videohosting.entity.Video;
-import com.example.videohosting.repository.utils.AssessmentCommentUtils;
+import com.example.videohosting.utils.AssessmentCommentUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +12,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
@@ -36,13 +29,6 @@ class AssessmentCommentRepositoryTest {
         registry.add("spring.datasource.username", postgresqlContainer::getUsername);
         registry.add("spring.datasource.password", postgresqlContainer::getPassword);
     }
-
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private VideoRepository videoRepository;
-    @Autowired
-    private CommentRepository commentRepository;
 
     @Autowired
     private AssessmentCommentRepository assessmentCommentRepository;

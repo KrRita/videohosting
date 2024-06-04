@@ -8,6 +8,7 @@ import com.example.videohosting.dto.videoDto.PreviewVideoResponse;
 import com.example.videohosting.dto.videoDto.UpdateVideoRequest;
 import com.example.videohosting.dto.videoDto.VideoResponse;
 import com.example.videohosting.dto.viewedVideoDto.CreateViewedVideoRequest;
+import com.example.videohosting.exception.LoadFileException;
 import com.example.videohosting.mapper.AssessmentVideoMapper;
 import com.example.videohosting.mapper.CommentMapper;
 import com.example.videohosting.mapper.VideoMapper;
@@ -83,9 +84,9 @@ public class VideoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity.BodyBuilder deleteVideo(@PathVariable Long id) {
+    public ResponseEntity<?> deleteVideo(@PathVariable Long id) {
         videoService.deleteVideo(id);
-        return ResponseEntity.status(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/{id}")
@@ -162,16 +163,24 @@ public class VideoController {
         String videoPath = "video\\" + response.getIdVideo() + ".mp4";
         String userPreviewPath = "imageIconUser\\" + response.getPreviewUserResponse().getIdUser() + ".jpeg";
         Resource video = mediaService.getMedia(videoPath);
-        Resource preview = mediaService.getMedia(userPreviewPath);
         response.setVideoFile(video);
-        response.getPreviewUserResponse().setImageIcon(preview);
+        try {
+            Resource preview = mediaService.getMedia(userPreviewPath);
+            response.getPreviewUserResponse().setImageIcon(preview);
+        } catch (LoadFileException ex) {
+            response.getPreviewUserResponse().setImageIcon(null);
+        }
     }
 
     private void addVideoPreview(List<PreviewVideoResponse> responses) {
         for (PreviewVideoResponse response : responses) {
             String videoPreview = "previewVideo\\" + response.getIdVideo() + ".jpeg";
-            Resource preview = mediaService.getMedia(videoPreview);
-            response.setPreviewImage(preview);
+            try {
+                Resource preview = mediaService.getMedia(videoPreview);
+                response.setPreviewImage(preview);
+            } catch (LoadFileException ex) {
+                response.setPreviewImage(null);
+            }
         }
     }
 }

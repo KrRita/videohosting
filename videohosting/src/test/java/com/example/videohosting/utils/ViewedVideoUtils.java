@@ -1,4 +1,4 @@
-package com.example.videohosting.repository.utils;
+package com.example.videohosting.utils;
 
 import com.example.videohosting.entity.User;
 import com.example.videohosting.entity.Video;

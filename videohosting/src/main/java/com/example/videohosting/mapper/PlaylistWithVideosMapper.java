@@ -33,6 +33,7 @@ public abstract class PlaylistWithVideosMapper {
         previewVideoResponse.setIdVideo(model.getVideo().getIdVideo());
         previewVideoResponse.setReleaseDateTime(model.getVideo().getReleaseDateTime());
         previewVideoResponse.setName(model.getVideo().getName());
+        previewVideoResponse.setDescription(model.getVideo().getDescription());
         previewVideoResponse.setDuration(model.getVideo().getDuration());
         previewVideoResponse.setCountViewing(model.getVideo().getCountViewing());
         playlistWithVideosResponse.setPreviewVideoResponse(previewVideoResponse);

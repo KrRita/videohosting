@@ -54,6 +54,4 @@ public abstract class ViewedVideoMapper {
         }
         return models.stream().map(this::toResponseFromModel).toList();
     }
-
-
 }

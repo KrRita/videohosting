@@ -2,6 +2,7 @@ package com.example.videohosting.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,7 +34,7 @@ public class Video {
     private String description;
     @Column(name = "release_date_time")
     private Timestamp releaseDateTime;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "Videos_categories",
             joinColumns = @JoinColumn(name = "id_video"),
             inverseJoinColumns = @JoinColumn(name = "id_category"))

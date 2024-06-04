@@ -1,11 +1,11 @@
-package com.example.videohosting.repository.utils;
+package com.example.videohosting.utils;
 
-import com.example.videohosting.entity.AssessmentComment;
-import com.example.videohosting.entity.Comment;
+import com.example.videohosting.entity.Playlist;
+import com.example.videohosting.entity.PlaylistWithVideos;
 import com.example.videohosting.entity.User;
 import com.example.videohosting.entity.Video;
-import com.example.videohosting.repository.AssessmentCommentRepository;
-import com.example.videohosting.repository.CommentRepository;
+import com.example.videohosting.repository.PlaylistRepository;
+import com.example.videohosting.repository.PlaylistWithVideosRepository;
 import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +15,17 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Component
-public class AssessmentCommentUtils {
+public class PlaylistWithVideosUtils {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private PlaylistRepository playlistRepository;
+    @Autowired
     private VideoRepository videoRepository;
     @Autowired
-    private CommentRepository commentRepository;
-    @Autowired
-    private AssessmentCommentRepository assessmentCommentRepository;
+    private PlaylistWithVideosRepository playlistWithVideosRepository;
 
-    public AssessmentComment createAndSaveAssessmentComment() {
+    public PlaylistWithVideos createAndSavePlaylistWithVideos() {
         User user = new User();
         user.setEmail("testuser@example.com");
         user.setChannelName("Test Channel");
@@ -40,29 +40,27 @@ public class AssessmentCommentUtils {
         Video video = new Video();
         video.setUser(user);
         video.setName("Test Video");
-        video.setDuration(100L);
+        video.setDuration(600L);
         video.setDescription("Test Description");
         video.setReleaseDateTime(new Timestamp(System.currentTimeMillis()));
         video.setCategories(List.of());
         video = videoRepository.save(video);
 
-        Comment comment = new Comment();
-        comment.setIdVideo(video.getIdVideo());
-        comment.setUser(user);
-        comment.setText("Test Comment");
-        comment.setReleaseDateTime(new Timestamp(System.currentTimeMillis()));
-        comment = commentRepository.save(comment);
+        Playlist playlist = new Playlist();
+        playlist.setUser(user);
+        playlist.setNamePlaylist("Test Playlist");
+        playlist.setDateCreation(new Timestamp(System.currentTimeMillis()));
+        playlist = playlistRepository.save(playlist);
 
-        AssessmentComment assessmentComment = new AssessmentComment();
-        assessmentComment.setIdUser(user.getIdUser());
-        assessmentComment.setIdComment(comment.getIdComment());
-        assessmentComment.setLiked(true);
-        return assessmentCommentRepository.save(assessmentComment);
+        PlaylistWithVideos playlistWithVideos = new PlaylistWithVideos();
+        playlistWithVideos.setIdPlaylist(playlist.getIdPlaylist());
+        playlistWithVideos.setVideo(video);
+        playlistWithVideos.setDateOfAddition(new Timestamp(System.currentTimeMillis()));
+        return playlistWithVideosRepository.save(playlistWithVideos);
     }
-
     public void tearDown() {
-        assessmentCommentRepository.deleteAll();
-        commentRepository.deleteAll();
+        playlistWithVideosRepository.deleteAll();
+        playlistRepository.deleteAll();
         videoRepository.deleteAll();
         userRepository.deleteAll();
     }

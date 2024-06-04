@@ -1,4 +1,4 @@
-package com.example.videohosting.repository.utils;
+package com.example.videohosting.utils;
 
 import com.example.videohosting.entity.Playlist;
 import com.example.videohosting.entity.User;
@@ -19,11 +19,11 @@ public class PlaylistUtils {
 
     public Playlist createAndSavePlaylist() {
         User user = new User();
-        user.setEmail("testuser@example.com");
-        user.setChannelName("Test Channel");
-        user.setDescription("Test Description");
+        user.setEmail("testuser123@example.com");
+        user.setChannelName("Test Channel123");
+        user.setDescription("Test Description123");
         user.setDateOfRegistration(new Timestamp(System.currentTimeMillis()));
-        user.setPassword("password");
+        user.setPassword("password123456");
         user.setSubscriptions(List.of());
         user.setVideos(List.of());
         user.setPlaylists(List.of());

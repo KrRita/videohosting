@@ -5,6 +5,7 @@ import com.example.videohosting.entity.Category;
 import com.example.videohosting.entity.PlaylistWithVideos;
 import com.example.videohosting.entity.Video;
 import com.example.videohosting.entity.ViewedVideo;
+import com.example.videohosting.exception.DeleteFileException;
 import com.example.videohosting.exception.LoadFileException;
 import com.example.videohosting.exception.NotFoundException;
 import com.example.videohosting.mapper.AssessmentVideoMapper;
@@ -27,6 +28,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -148,9 +150,19 @@ public class VideoService {
         String videoPath = "video\\" + id + ".mp4";
         String previewPath = "previewVideo\\" + id + ".jpeg";
         videoRepository.deleteById(id);
-        mediaService.deleteMedia(videoPath);
-        mediaService.deleteMedia(previewPath);
-        logger.info("Video and associated media deleted with id: {}", id);
+        logger.info("Video deleted with id: {}", id);
+        try {
+            mediaService.deleteMedia(videoPath);
+            logger.info("Video deleted");
+        } catch (DeleteFileException ex) {
+            logger.warn("Failed to delete associated media");
+        }
+        try {
+            mediaService.deleteMedia(previewPath);
+            logger.info("Associated media deleted");
+        } catch (DeleteFileException ex) {
+            logger.warn("Failed to delete associated media");
+        }
     }
 
     @Cacheable(value = "videos", key = "#id")
@@ -173,6 +185,7 @@ public class VideoService {
         return videoModel;
     }
 
+    @Transactional
     public List<VideoModel> getSubscriptionsVideos(Long idUser) {
         logger.info("Getting subscription videos for user: {}", idUser);
         List<Video> videos = videoRepository.getVideosByUser_IdUser(idUser);
@@ -181,6 +194,7 @@ public class VideoService {
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
+    @Transactional
     public List<ViewedVideoModel> getViewedVideos(Long idUser) {
         logger.info("Getting viewed videos for user: {}", idUser);
         List<ViewedVideo> viewedVideos = viewedVideoRepository.getViewedVideosByIdUser(idUser);
@@ -204,6 +218,7 @@ public class VideoService {
         return viewedVideoModels;
     }
 
+    @Transactional
     public List<VideoModel> getVideosByName(String name) {
         logger.info("Getting videos by name: {}", name);
         List<Video> videos = videoRepository.findByNameContaining(name);
@@ -212,6 +227,7 @@ public class VideoService {
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
+    @Transactional
     public List<VideoModel> getVideosByUserName(String name) {
         logger.info("Getting videos by user name: {}", name);
         List<Video> videos = videoRepository.findByUser_ChannelNameContaining(name);
@@ -220,6 +236,7 @@ public class VideoService {
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
+    @Transactional
     public List<VideoModel> getVideosByCategories(List<String> categories) {
         logger.info("Getting videos by categories: {}", categories);
         List<Video> videos = videoRepository.findDistinctByCategories_NameIn(categories);
@@ -256,6 +273,7 @@ public class VideoService {
         return findVideoById(viewedVideoModel.getVideo().getIdVideo());
     }
 
+    @Transactional
     public List<VideoModel> getLikedVideos(Long idUser) {
         logger.info("Getting liked videos of user with id: {}", idUser);
         List<AssessmentVideo> assessmentVideos =
@@ -268,6 +286,7 @@ public class VideoService {
         return videoServiceUtils.addFieldInModelList(videoModels);
     }
 
+    @Transactional
     public List<PlaylistWithVideosModel> getVideosFromPlaylist(Long idPlaylist) {
         logger.info("Getting videos from playlist with id: {}", idPlaylist);
         List<PlaylistWithVideos> playlistWithVideos =
@@ -293,6 +312,7 @@ public class VideoService {
         return playlistWithVideosModels;
     }
 
+    @Transactional
     public List<PlaylistWithVideosModel> insertPlaylistWithVideos(PlaylistWithVideosModel playlistWithVideosModel) {
         logger.info("Inserting video in playlist: {}", playlistWithVideosModel);
         PlaylistWithVideos playlistWithVideos = playlistWithVideosMapper.toEntity(playlistWithVideosModel);
@@ -302,6 +322,7 @@ public class VideoService {
         return getVideosFromPlaylist(playlistWithVideosModel.getIdPlaylist());
     }
 
+    @Transactional
     public List<PlaylistWithVideosModel> deletePlaylistWithVideos(Long idPlaylist, Long idVideo) {
         logger.info("Deleting video from playlist for playlist ID: {} and video ID: {}", idPlaylist, idVideo);
         Long id = playlistWithVideosRepository

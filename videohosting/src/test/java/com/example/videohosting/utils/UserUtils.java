@@ -1,4 +1,4 @@
-package com.example.videohosting.repository.utils;
+package com.example.videohosting.utils;
 
 import com.example.videohosting.entity.User;
 import com.example.videohosting.repository.UserRepository;
@@ -37,6 +37,10 @@ public class UserUtils {
         userRepository.save(user);
 
         return subscription;
+    }
+
+    public void tearDown() {
+        userRepository.deleteAll();
     }
 
 }

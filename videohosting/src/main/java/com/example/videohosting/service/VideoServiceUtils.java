@@ -60,6 +60,9 @@ public class VideoServiceUtils {
     public List<String> toCategoryStringList(List<Category> categories) {
         logger.info("Converting category entities to category names");
         List<String> categoryStrings = new ArrayList<>();
+        if (categories == null) {
+            return categoryStrings;
+        }
         for (Category category : categories) {
             categoryStrings.add(category.getName());
         }

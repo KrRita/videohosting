@@ -1,6 +1,7 @@
 package com.example.videohosting.service;
 
 import com.example.videohosting.entity.Playlist;
+import com.example.videohosting.exception.DeleteFileException;
 import com.example.videohosting.exception.NotFoundException;
 import com.example.videohosting.mapper.PlaylistMapper;
 import com.example.videohosting.model.PlaylistModel;
@@ -78,8 +79,14 @@ public class PlaylistService {
         logger.info("Deleting playlist with id: {}", id);
         String path = "imageIconPlaylist\\" + id + ".jpeg";
         playlistRepository.deleteById(id);
-        mediaService.deleteMedia(path);
-        logger.info("Deleted playlist and associated media with id: {}", id);
+        logger.info("Deleted playlist with id: {}", id);
+        try {
+            mediaService.deleteMedia(path);
+            logger.info("Deleted associated media");
+        } catch (DeleteFileException ex) {
+            logger.warn("Failed to delete associated media");
+        }
+
     }
 
     public PlaylistModel findPlaylistById(Long id) {

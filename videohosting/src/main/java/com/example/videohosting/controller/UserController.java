@@ -7,6 +7,7 @@ import com.example.videohosting.dto.userDto.UpdateUserRequest;
 import com.example.videohosting.dto.userDto.UserResponse;
 import com.example.videohosting.dto.videoDto.PreviewVideoResponse;
 import com.example.videohosting.dto.viewedVideoDto.ViewedVideoResponse;
+import com.example.videohosting.exception.LoadFileException;
 import com.example.videohosting.mapper.PlaylistMapper;
 import com.example.videohosting.mapper.VideoMapper;
 import com.example.videohosting.mapper.ViewedVideoMapper;
@@ -95,10 +96,10 @@ public class UserController {
     }
 
     @DeleteMapping()
-    public ResponseEntity.BodyBuilder deleteUser(Authentication authentication) {
+    public ResponseEntity<?> deleteUser(Authentication authentication) {
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         userService.delete(id);
-        return ResponseEntity.status(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/{id}")
@@ -181,17 +182,29 @@ public class UserController {
     private void addIconAndHeader(UserResponse response) {
         String headerPath = "imageHeaderUser\\" + response.getIdUser() + ".jpeg";
         String iconPath = "imageIconUser\\" + response.getIdUser() + ".jpeg";
-        Resource header = mediaService.getMedia(headerPath);
-        Resource icon = mediaService.getMedia(iconPath);
-        response.setImageHeader(header);
-        response.setImageIcon(icon);
+        try {
+            Resource header = mediaService.getMedia(headerPath);
+            response.setImageHeader(header);
+        } catch (LoadFileException ex) {
+            response.setImageHeader(null);
+        }
+        try {
+            Resource icon = mediaService.getMedia(iconPath);
+            response.setImageIcon(icon);
+        } catch (LoadFileException ex) {
+            response.setImageIcon(null);
+        }
     }
 
     private void addVideoPreview(List<PreviewVideoResponse> responses) {
         for (PreviewVideoResponse response : responses) {
             String videoPreview = "previewVideo\\" + response.getIdVideo() + ".jpeg";
-            Resource preview = mediaService.getMedia(videoPreview);
-            response.setPreviewImage(preview);
+            try {
+                Resource preview = mediaService.getMedia(videoPreview);
+                response.setPreviewImage(preview);
+            } catch (LoadFileException ex) {
+                response.setPreviewImage(null);
+            }
         }
     }
 

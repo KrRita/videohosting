@@ -82,22 +82,24 @@ public class PlaylistResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PlaylistResponse that = (PlaylistResponse) o;
+        PlaylistResponse response = (PlaylistResponse) o;
 
-        if (!idPlaylist.equals(that.idPlaylist)) return false;
-        if (!namePlaylist.equals(that.namePlaylist)) return false;
-        if (!dateCreation.equals(that.dateCreation)) return false;
-        if (!Objects.equals(imageIcon, that.imageIcon)) return false;
-        return countVideos.equals(that.countVideos);
+        if (!Objects.equals(idPlaylist, response.idPlaylist)) return false;
+        if (!Objects.equals(namePlaylist, response.namePlaylist))
+            return false;
+        if (!Objects.equals(dateCreation, response.dateCreation))
+            return false;
+        if (!Objects.equals(imageIcon, response.imageIcon)) return false;
+        return Objects.equals(countVideos, response.countVideos);
     }
 
     @Override
     public int hashCode() {
-        int result = idPlaylist.hashCode();
-        result = 31 * result + namePlaylist.hashCode();
-        result = 31 * result + dateCreation.hashCode();
+        int result = idPlaylist != null ? idPlaylist.hashCode() : 0;
+        result = 31 * result + (namePlaylist != null ? namePlaylist.hashCode() : 0);
+        result = 31 * result + (dateCreation != null ? dateCreation.hashCode() : 0);
         result = 31 * result + (imageIcon != null ? imageIcon.hashCode() : 0);
-        result = 31 * result + countVideos.hashCode();
+        result = 31 * result + (countVideos != null ? countVideos.hashCode() : 0);
         return result;
     }
     @Override

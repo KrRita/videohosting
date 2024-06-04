@@ -1,7 +1,7 @@
 package com.example.videohosting.repository;
 
 import com.example.videohosting.entity.ViewedVideo;
-import com.example.videohosting.repository.utils.ViewedVideoUtils;
+import com.example.videohosting.utils.ViewedVideoUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,6 +6,7 @@ import com.example.videohosting.exception.UserAlreadyExistsException;
 import org.jcodec.api.JCodecException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -42,6 +43,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
     @ExceptionHandler(JCodecException.class)
     public ResponseEntity<Object> jCodecExceptionHandler(JCodecException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Object> jCodecExceptionHandler(BadCredentialsException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 

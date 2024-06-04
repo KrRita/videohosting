@@ -18,15 +18,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/")
 public class JwtAuthorizationController {
     private final UserService userService;
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
-    private final MediaService mediaService;
 
     @Autowired
     public JwtAuthorizationController(UserService userService, UserMapper userMapper,
@@ -36,7 +37,6 @@ public class JwtAuthorizationController {
         this.userMapper = userMapper;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
-        this.mediaService = mediaService;
     }
 
     @PostMapping("/signUp")

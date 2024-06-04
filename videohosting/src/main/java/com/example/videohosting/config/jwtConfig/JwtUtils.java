@@ -1,6 +1,7 @@
 package com.example.videohosting.config.jwtConfig;
 
 import com.example.videohosting.model.UserModel;
+import com.example.videohosting.service.CommentService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -8,6 +9,8 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -22,9 +25,10 @@ public class JwtUtils {
 
     @Value("${videohosting.app.jwtExpirationMs}")
     private int jwtExpirationMs;
+    private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     public String generateJwtToken(Authentication authentication) {
-
+        logger.info("The beginning of token generation");
         UserModel userPrincipal = (UserModel) authentication.getPrincipal();
 
         return Jwts.builder()
@@ -52,22 +56,24 @@ public class JwtUtils {
     }
 
     public boolean validateJwtToken(String authToken) {
+        logger.info("The beginning of token validation");
         try {
             Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(authToken);
+            logger.info("Validation passed");
             return true;
         } catch (SignatureException e) {
-            //log
+            logger.error("A SignatureException occurred during verification");
         } catch (MalformedJwtException e) {
-            //log
+            logger.error("A MalformedJwtException occurred during verification");
         } catch (ExpiredJwtException e) {
-            //log
+            logger.error("A ExpiredJwtException occurred during verification");
         } catch (UnsupportedJwtException e) {
-            //log
+            logger.error("A UnsupportedJwtException occurred during verification");
         } catch (IllegalArgumentException e) {
-            //log
+            logger.error("A IllegalArgumentException occurred during verification");
         }
         return false;
     }

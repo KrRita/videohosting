@@ -1,4 +1,4 @@
-package com.example.videohosting.repository.utils;
+package com.example.videohosting.utils;
 
 import com.example.videohosting.entity.Category;
 import com.example.videohosting.entity.User;
@@ -56,36 +56,11 @@ public class VideoUtils {
         video.setDuration(600L);
         video.setDescription("Test Description");
         video.setReleaseDateTime(new Timestamp(System.currentTimeMillis()));
-        video.setCategories(List.of(category));
+        List<Category> list = new ArrayList<>();
+        list.add(category);
+        video.setCategories(list);
         return videoRepository.save(video);
     }
-
-/*
-    public Video getVideoSubscription(User user) {
-        User subscription = new User();
-        subscription.setEmail("user@example.com");
-        subscription.setChannelName("Channel");
-        subscription.setDescription("Description");
-        subscription.setDateOfRegistration(new Timestamp(System.currentTimeMillis()));
-        subscription.setPassword("password123");
-        subscription.setSubscriptions(new ArrayList<>());
-        subscription.setVideos(new ArrayList<>());
-        subscription.setPlaylists(new ArrayList<>());
-        userRepository.save(subscription);
-
-        user.setSubscriptions(List.of(subscription));
-        userRepository.save(user);
-
-        Video videoSubscription = new Video();
-        videoSubscription.setUser(subscription);
-        videoSubscription.setName("Video");
-        videoSubscription.setDuration(900L);
-        videoSubscription.setDescription("Description");
-        videoSubscription.setReleaseDateTime(new Timestamp(System.currentTimeMillis()));
-        videoSubscription.setCategories(new ArrayList<>());
-        return videoRepository.save(videoSubscription);
-    }
-*/
 
     public void tearDown() {
         videoRepository.deleteAll();

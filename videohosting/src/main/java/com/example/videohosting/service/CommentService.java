@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -91,6 +92,7 @@ public class CommentService {
         return commentModel;
     }
 
+    @Transactional
     public List<CommentModel> getCommentsOnTheVideo(Long idVideo) {
         logger.info("Getting comments for video with ID: {}", idVideo);
         List<Comment> comments = commentRepository.getCommentsByIdVideo(idVideo);
