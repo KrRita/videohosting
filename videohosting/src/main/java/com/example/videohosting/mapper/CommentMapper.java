@@ -14,7 +14,8 @@ import org.mapstruct.Mapping;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = UserWithoutListsMapper.class, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", uses = UserWithoutListsMapper.class,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class CommentMapper {
     @Mapping(target = "user", qualifiedByName = "toUserEntityWithoutLists")
     public abstract Comment toEntity(CommentModel model);

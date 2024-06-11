@@ -18,6 +18,7 @@ import com.example.videohosting.model.VideoModel;
 import com.example.videohosting.model.ViewedVideoModel;
 import com.example.videohosting.repository.AssessmentVideoRepository;
 import com.example.videohosting.repository.PlaylistWithVideosRepository;
+import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.VideoRepository;
 import com.example.videohosting.repository.ViewedVideoRepository;
 import org.jcodec.api.JCodecException;
@@ -41,6 +42,7 @@ import java.util.List;
 @Service
 public class VideoService {
     private final VideoRepository videoRepository;
+    private final UserRepository userRepository;
     private final VideoMapper videoMapper;
     private final ViewedVideoRepository viewedVideoRepository;
     private final ViewedVideoMapper viewedVideoMapper;
@@ -53,7 +55,7 @@ public class VideoService {
     private final Logger logger = LoggerFactory.getLogger(VideoService.class);
 
     @Autowired
-    public VideoService(VideoRepository videoRepository, VideoMapper videoMapper,
+    public VideoService(VideoRepository videoRepository, UserRepository userRepository, VideoMapper videoMapper,
                         ViewedVideoRepository viewedVideoRepository, ViewedVideoMapper viewedVideoMapper,
                         AssessmentVideoRepository assessmentVideoRepository,
                         AssessmentVideoMapper assessmentVideoMapper,
@@ -61,6 +63,7 @@ public class VideoService {
                         PlaylistWithVideosMapper playlistWithVideosMapper,
                         VideoServiceUtils videoServiceUtils, MediaService mediaService) {
         this.videoRepository = videoRepository;
+        this.userRepository = userRepository;
         this.videoMapper = videoMapper;
         this.viewedVideoRepository = viewedVideoRepository;
         this.viewedVideoMapper = viewedVideoMapper;
@@ -74,7 +77,8 @@ public class VideoService {
 
 
     @CachePut(value = "videos", key = "#result.idVideo")
-    public VideoModel insertVideo(VideoModel videoModel, MultipartFile videoFile, MultipartFile preview) throws IOException, JCodecException {
+    public VideoModel insertVideo(VideoModel videoModel, MultipartFile videoFile,
+                                  MultipartFile preview) throws IOException, JCodecException {
         logger.info("Inserting video: {}", videoModel.getName());
         if (videoFile == null) {
             logger.error("File upload error: video file is null");
@@ -98,6 +102,8 @@ public class VideoService {
         Video savedVideoWithDuration = videoRepository.save(savedVideo);
 
         VideoModel savedVideoModel = videoMapper.toModel(savedVideoWithDuration);
+        savedVideoModel.getUser().setCountSubscribers(
+                userRepository.getSubscribersCountByIdUser(savedVideo.getUser().getIdUser()));
         List<String> categories = videoServiceUtils.toCategoryStringList(savedVideo.getCategories());
         savedVideoModel.setCategories(categories);
         Long count = 0L;
@@ -132,13 +138,17 @@ public class VideoService {
         }
         Video savedVideo = videoRepository.save(oldVideo);
         VideoModel savedVideoModel = videoMapper.toModel(savedVideo);
+        savedVideoModel.getUser().setCountSubscribers(
+                userRepository.getSubscribersCountByIdUser(savedVideo.getUser().getIdUser()));
         savedVideoModel.setCategories(videoServiceUtils.toCategoryStringList(savedVideo.getCategories()));
         Long idVideo = savedVideoModel.getIdVideo();
         Long countViews = viewedVideoRepository.countViewedVideosByVideo_IdVideo(idVideo);
         savedVideoModel.setCountViewing(countViews);
-        Long countLikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true);
+        Long countLikes = assessmentVideoRepository
+                .countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true);
         savedVideoModel.setCountLikes(countLikes);
-        Long countDislikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false);
+        Long countDislikes = assessmentVideoRepository
+                .countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false);
         savedVideoModel.setCountDislikes(countDislikes);
         logger.info("Video updated: {}", savedVideoModel.getIdVideo());
         return savedVideoModel;
@@ -177,6 +187,8 @@ public class VideoService {
         Long countLikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, true);
         Long countDislikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, false);
         VideoModel videoModel = videoMapper.toModel(video);
+        videoModel.getUser().setCountSubscribers(
+                userRepository.getSubscribersCountByIdUser(videoModel.getUser().getIdUser()));
         videoModel.setCountViewing(countViews);
         videoModel.setCountLikes(countLikes);
         videoModel.setCountDislikes(countDislikes);
@@ -188,7 +200,7 @@ public class VideoService {
     @Transactional
     public List<VideoModel> getSubscriptionsVideos(Long idUser) {
         logger.info("Getting subscription videos for user: {}", idUser);
-        List<Video> videos = videoRepository.getVideosByUser_IdUser(idUser);
+        List<Video> videos = videoRepository.getVideosBySubscription(idUser);
         List<VideoModel> videoModels = videoServiceUtils.getVideoModelListWithCategories(videos);
         logger.info("Subscriptions videos retrieved for user: {}", idUser);
         return videoServiceUtils.addFieldInModelList(videoModels);
@@ -201,9 +213,13 @@ public class VideoService {
         List<ViewedVideoModel> viewedVideoModels = viewedVideoMapper.toModelList(viewedVideos);
         for (ViewedVideoModel viewedVideoModel : viewedVideoModels) {
             Long idVideo = viewedVideoModel.getVideo().getIdVideo();
+            viewedVideoModel.getVideo().getUser().setCountSubscribers(
+                    userRepository.getSubscribersCountByIdUser(viewedVideoModel.getVideo().getUser().getIdUser()));
             Long countViews = viewedVideoRepository.countViewedVideosByVideo_IdVideo(idVideo);
-            Long countLikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true);
-            Long countDislikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false);
+            Long countLikes = assessmentVideoRepository
+                    .countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true);
+            Long countDislikes = assessmentVideoRepository
+                    .countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false);
             viewedVideoModel.getVideo().setCountViewing(countViews);
             viewedVideoModel.getVideo().setCountLikes(countLikes);
             viewedVideoModel.getVideo().setCountDislikes(countDislikes);
@@ -212,7 +228,8 @@ public class VideoService {
         Iterator<ViewedVideoModel> viewedVideoModelIterator = viewedVideoModels.iterator();
         while (viewedVideoIterator.hasNext() && viewedVideoModelIterator.hasNext()) {
             List<Category> categories = viewedVideoIterator.next().getVideo().getCategories();
-            viewedVideoModelIterator.next().getVideo().setCategories(videoServiceUtils.toCategoryStringList(categories));
+            viewedVideoModelIterator.next().getVideo().setCategories(
+                    videoServiceUtils.toCategoryStringList(categories));
         }
         logger.info("Viewed videos retrieved for user: {}", idUser);
         return viewedVideoModels;
@@ -297,13 +314,17 @@ public class VideoService {
         Iterator<PlaylistWithVideosModel> playlistWithVideosModelIterator = playlistWithVideosModels.iterator();
         while (playlistWithVideosModelIterator.hasNext() && playlistWithVideosIterator.hasNext()) {
             VideoModel videoModel = playlistWithVideosModelIterator.next().getVideo();
+            videoModel.getUser().setCountSubscribers(
+                    userRepository.getSubscribersCountByIdUser(videoModel.getUser().getIdUser()));
             Long idVideoModel = videoModel.getIdVideo();
             List<Category> categories = playlistWithVideosIterator.next().getVideo().getCategories();
             List<String> categoryStrings = videoServiceUtils.toCategoryStringList(categories);
             videoModel.setCategories(categoryStrings);
             Long countViews = viewedVideoRepository.countViewedVideosByVideo_IdVideo(idVideoModel);
-            Long countLikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideoModel, true);
-            Long countDislikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideoModel, false);
+            Long countLikes = assessmentVideoRepository
+                    .countAssessmentVideosByVideo_IdVideoAndLiked(idVideoModel, true);
+            Long countDislikes = assessmentVideoRepository
+                    .countAssessmentVideosByVideo_IdVideoAndLiked(idVideoModel, false);
             videoModel.setCountViewing(countViews);
             videoModel.setCountLikes(countLikes);
             videoModel.setCountDislikes(countDislikes);

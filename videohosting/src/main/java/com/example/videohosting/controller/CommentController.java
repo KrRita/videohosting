@@ -55,7 +55,8 @@ public class CommentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CommentResponse> putComment(@PathVariable Long id, @Valid @RequestBody UpdateCommentRequest request) {
+    public ResponseEntity<CommentResponse> putComment(@PathVariable Long id,
+                                                      @Valid @RequestBody UpdateCommentRequest request) {
         CommentModel commentModel = commentMapper.toModelFromUpdateRequest(request);
         commentModel.setIdComment(id);
         CommentModel model = commentService.updateComment(commentModel);
@@ -77,7 +78,8 @@ public class CommentController {
     }
 
     @PostMapping("/{id}/assessment")
-    public ResponseEntity<CommentResponse> postAssessmentComment(@PathVariable Long id, @Valid @RequestBody CreateAssessmentCommentRequest request) {
+    public ResponseEntity<CommentResponse> postAssessmentComment(
+            @PathVariable Long id, @Valid @RequestBody CreateAssessmentCommentRequest request) {
         AssessmentCommentModel assessmentCommentModel = assessmentCommentMapper.toModelFromCreateRequest(request);
         assessmentCommentModel.setIdComment(id);
         CommentModel commentModel = commentService.insertAssessmentComment(assessmentCommentModel);
@@ -86,7 +88,8 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}/assessment")
-    public ResponseEntity<CommentResponse> deleteAssessmentComment(@PathVariable Long id, @Valid @RequestBody DeleteAssessmentCommentRequest request) {
+    public ResponseEntity<CommentResponse> deleteAssessmentComment(
+            @PathVariable Long id, @Valid @RequestBody DeleteAssessmentCommentRequest request) {
         CommentModel commentModel = commentService.deleteAssessmentComment(request.getIdUser(), id);
         CommentResponse response = commentMapper.toResponseFromModel(commentModel);
         return ResponseEntity.status(HttpStatus.OK).body(response);

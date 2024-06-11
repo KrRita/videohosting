@@ -74,7 +74,8 @@ public class VideoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VideoResponse> putVideo(@PathVariable Long id, @Valid @RequestBody UpdateVideoRequest request) {
+    public ResponseEntity<VideoResponse> putVideo(
+            @PathVariable Long id, @Valid @RequestBody UpdateVideoRequest request) {
         VideoModel model = videoMapper.toModelFromUpdateRequest(request);
         model.setIdVideo(id);
         VideoModel videoModel = videoService.updateVideo(model, request.getPreviewImage());
@@ -122,10 +123,11 @@ public class VideoController {
     }
 
     @PostMapping("/{idVideo}/assessment")
-    public ResponseEntity<VideoResponse> createAssessmentVideo(@PathVariable Long idVideo,
-                                                               @Valid @RequestBody CreateAssessmentVideoRequest request) {
+    public ResponseEntity<VideoResponse> createAssessmentVideo(
+            @PathVariable Long idVideo, @Valid @RequestBody CreateAssessmentVideoRequest request) {
         AssessmentVideoModel model = assessmentVideoMapper.toModelFromCreateRequest(request);
-        model.getVideo().setIdVideo(idVideo);
+        VideoModel video = videoService.findVideoById(idVideo);
+        model.setVideo(video);
         VideoModel videoModel = videoService.insertAssessmentVideo(model);
         VideoResponse response = videoMapper.toVideoResponseFromModel(videoModel);
         addVideoAndUserPreview(response);
@@ -133,8 +135,8 @@ public class VideoController {
     }
 
     @DeleteMapping("/{idVideo}/assessment")
-    public ResponseEntity<VideoResponse> deleteAssessmentVideo(@PathVariable Long idVideo,
-                                                               @Valid @RequestBody DeleteAssessmentVideoRequest request) {
+    public ResponseEntity<VideoResponse> deleteAssessmentVideo(
+            @PathVariable Long idVideo, @Valid @RequestBody DeleteAssessmentVideoRequest request) {
         VideoModel model = videoService.deleteAssessmentVideo(request.getIdUser(), idVideo);
         VideoResponse response = videoMapper.toVideoResponseFromModel(model);
         addVideoAndUserPreview(response);
@@ -142,8 +144,8 @@ public class VideoController {
     }
 
     @PostMapping("/{idVideo}/viewed_video")
-    public ResponseEntity<VideoResponse> createViewedVideo(@PathVariable Long idVideo,
-                                                           @Valid @RequestBody CreateViewedVideoRequest request) {
+    public ResponseEntity<VideoResponse> createViewedVideo
+            (@PathVariable Long idVideo, @Valid @RequestBody CreateViewedVideoRequest request) {
         ViewedVideoModel model = viewedVideoMapper.toModelFromCreateRequest(request);
         model.getVideo().setIdVideo(idVideo);
         VideoModel videoModel = videoService.insertViewedVideo(model);
@@ -162,11 +164,11 @@ public class VideoController {
     private void addVideoAndUserPreview(VideoResponse response) {
         String videoPath = "video\\" + response.getIdVideo() + ".mp4";
         String userPreviewPath = "imageIconUser\\" + response.getPreviewUserResponse().getIdUser() + ".jpeg";
-        Resource video = mediaService.getMedia(videoPath);
-        response.setVideoFile(video);
         try {
+            Resource video = mediaService.getMedia(videoPath);
             Resource preview = mediaService.getMedia(userPreviewPath);
             response.getPreviewUserResponse().setImageIcon(preview);
+            response.setVideoFile(video);
         } catch (LoadFileException ex) {
             response.getPreviewUserResponse().setImageIcon(null);
         }

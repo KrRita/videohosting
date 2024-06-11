@@ -106,7 +106,7 @@ class UserServiceTest {
         when(userMapper.toEntity(userModel)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(user);
         when(userMapper.toModel(user)).thenReturn(userModel);
-        when(userRepository.getSubscriptionsCountByIdUser(idUser)).thenReturn(0L);
+        when(userRepository.getSubscribersCountByIdUser(idUser)).thenReturn(0L);
 
         UserModel result = userService.update(userModel, imageHeader, imageIcon);
 
@@ -130,7 +130,7 @@ class UserServiceTest {
         when(userMapper.toEntity(testUserModel)).thenReturn(testUser);
         when(userRepository.save(user)).thenReturn(user);
         when(userMapper.toModel(user)).thenReturn(userModel);
-        when(userRepository.getSubscriptionsCountByIdUser(idUser)).thenReturn(0L);
+        when(userRepository.getSubscribersCountByIdUser(idUser)).thenReturn(0L);
 
         userService.update(testUserModel, imageHeader, imageIcon);
 
@@ -159,7 +159,7 @@ class UserServiceTest {
         when(userMapper.toEntityList(subscriptionsModels)).thenReturn(subscriptions);
         when(userRepository.save(userTest)).thenReturn(user);
         when(userMapper.toModel(user)).thenReturn(userModel);
-        when(userRepository.getSubscriptionsCountByIdUser(idUser)).thenReturn(0L);
+        when(userRepository.getSubscribersCountByIdUser(idUser)).thenReturn(0L);
 
         UserModel result = userService.addSubscription(userModel);
 
@@ -187,7 +187,7 @@ class UserServiceTest {
         when(userRepository.findById(idUser)).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(userTest);
         when(userMapper.toModel(userTest)).thenReturn(userModelTest);
-        when(userRepository.getSubscriptionsCountByIdUser(idUser)).thenReturn(0L);
+        when(userRepository.getSubscribersCountByIdUser(idUser)).thenReturn(0L);
 
         UserModel result = userService.deleteSubscription(userModel);
 
@@ -208,7 +208,7 @@ class UserServiceTest {
         Long id = user.getIdUser();
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         when(userMapper.toModel(user)).thenReturn(userModel);
-        when(userRepository.getSubscriptionsCountByIdUser(id)).thenReturn(0L);
+        when(userRepository.getSubscribersCountByIdUser(id)).thenReturn(0L);
 
         UserModel result = userService.findUserById(1L);
         assertEquals(userModel, result);
@@ -221,7 +221,7 @@ class UserServiceTest {
 
         assertThrows(NotFoundException.class, () -> userService.findUserById(id));
         verify(userMapper, never()).toModel(user);
-        verify(userRepository, never()).getSubscriptionsCountByIdUser(id);
+        verify(userRepository, never()).getSubscribersCountByIdUser(id);
     }
 
 }

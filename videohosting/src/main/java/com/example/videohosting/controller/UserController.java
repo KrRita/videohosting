@@ -25,6 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -61,7 +63,9 @@ public class UserController {
     }
 
     @PutMapping()
-    public ResponseEntity<UserResponse> putUser(@Valid @RequestBody UpdateUserRequest request, Authentication authentication) {
+    @Transactional
+    public ResponseEntity<UserResponse> putUser(@Valid @RequestBody UpdateUserRequest request,
+                                                Authentication authentication) {
         UserModel model = userMapper.toModelFromUpdateRequest(request);
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         model.setIdUser(id);
@@ -72,11 +76,16 @@ public class UserController {
     }
 
     @PostMapping()
+    @Transactional
     public ResponseEntity<UserResponse> postSubscription
             (@Valid @RequestBody UpdateSubscriptionsRequest request, Authentication authentication) {
         UserModel model = userMapper.toModelFromUpdateSubscriptionsRequest(request);
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         model.setIdUser(id);
+        UserModel subscription = userService.findUserById(request.getIdSubscription());
+        List<UserModel> subscriptions = new ArrayList<>();
+        subscriptions.add(subscription);
+        model.setSubscriptions(subscriptions);
         UserModel userModel = userService.addSubscription(model);
         UserResponse response = userMapper.toResponseFromModel(userModel);
         addIconAndHeader(response);
@@ -84,6 +93,7 @@ public class UserController {
     }
 
     @DeleteMapping("/subscription")
+    @Transactional
     public ResponseEntity<UserResponse> deleteSubscription
             (@Valid @RequestBody UpdateSubscriptionsRequest request, Authentication authentication) {
         UserModel model = userMapper.toModelFromUpdateSubscriptionsRequest(request);
@@ -103,6 +113,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @Transactional
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         UserModel model = userService.findUserById(id);
         UserResponse response = userMapper.toResponseFromModel(model);
@@ -111,6 +122,7 @@ public class UserController {
     }
 
     @GetMapping("/subscriptions")
+    @Transactional
     public ResponseEntity<List<PreviewUserResponse>> getUserSubscriptions(Authentication authentication) {
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         UserModel user = userService.findUserById(id);
@@ -118,13 +130,18 @@ public class UserController {
         List<PreviewUserResponse> responses = userMapper.toPreviewUserResponseListFromModelUserList(subscriptions);
         for (PreviewUserResponse response : responses) {
             String iconPath = "imageIconUser\\" + response.getIdUser() + ".jpeg";
-            Resource icon = mediaService.getMedia(iconPath);
-            response.setImageIcon(icon);
+            try {
+                Resource icon = mediaService.getMedia(iconPath);
+                response.setImageIcon(icon);
+            } catch (LoadFileException ex) {
+                response.setImageIcon(null);
+            }
         }
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
     @GetMapping("/videos")
+    @Transactional
     public ResponseEntity<List<PreviewVideoResponse>> getUserVideos(Authentication authentication) {
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         UserModel user = userService.findUserById(id);
@@ -135,6 +152,7 @@ public class UserController {
     }
 
     @GetMapping("/subscriptions_videos")
+    @Transactional
     public ResponseEntity<List<PreviewVideoResponse>> getSubscriptionsVideos(Authentication authentication) {
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         List<VideoModel> videos = videoService.getSubscriptionsVideos(id);
@@ -150,8 +168,12 @@ public class UserController {
         List<ViewedVideoResponse> responses = viewedVideoMapper.toResponseListFromModelList(models);
         for (ViewedVideoResponse response : responses) {
             String videoPreview = "previewVideo\\" + response.getPreviewVideoResponse().getIdVideo() + ".jpeg";
-            Resource preview = mediaService.getMedia(videoPreview);
-            response.getPreviewVideoResponse().setPreviewImage(preview);
+            try {
+                Resource preview = mediaService.getMedia(videoPreview);
+                response.getPreviewVideoResponse().setPreviewImage(preview);
+            } catch (LoadFileException ex) {
+                response.getPreviewVideoResponse().setPreviewImage(null);
+            }
         }
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
@@ -173,8 +195,12 @@ public class UserController {
         List<PlaylistResponse> responses = playlistMapper.toPlaylistResponseListFromPlaylistModelList(models);
         for (PlaylistResponse response : responses) {
             String iconPlaylist = "imageIconPlaylist\\" + response.getIdPlaylist() + ".jpeg";
-            Resource icon = mediaService.getMedia(iconPlaylist);
-            response.setImageIcon(icon);
+            try {
+                Resource icon = mediaService.getMedia(iconPlaylist);
+                response.setImageIcon(icon);
+            } catch (LoadFileException ex) {
+                response.setImageIcon(null);
+            }
         }
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }

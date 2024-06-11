@@ -11,7 +11,7 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
                    "FROM User_ u1 JOIN Subscription s ON u1.id_user = s.id_user_subscriber " +
                    "JOIN Video v ON s.id_user_channel = v.id_user WHERE u1.id_user = :idUser",
             nativeQuery = true)
-    List<Video>  getVideosByUser_IdUser(Long idUser);
+    List<Video> getVideosBySubscription(Long idUser);
     List<Video> findByNameContaining(String videoName);
     List<Video> findByUser_ChannelNameContaining(String name);
     List<Video> findDistinctByCategories_NameIn(List<String> categories);

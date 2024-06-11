@@ -62,8 +62,10 @@ public class CommentService {
         oldComment.setReleaseDateTime(Timestamp.valueOf(LocalDateTime.now()));
         Comment savedComment = commentRepository.save(oldComment);
         CommentModel savedCommentModel = commentMapper.toModelFromEntity(savedComment);
-        Long countLikes = assessmentCommentRepository.countAssessmentCommentsByIdCommentAndLiked(savedComment.getIdComment(), true);
-        Long countDislikes = assessmentCommentRepository.countAssessmentCommentsByIdCommentAndLiked(savedComment.getIdComment(), false);
+        Long countLikes = assessmentCommentRepository
+                .countAssessmentCommentsByIdCommentAndLiked(savedComment.getIdComment(), true);
+        Long countDislikes = assessmentCommentRepository
+                .countAssessmentCommentsByIdCommentAndLiked(savedComment.getIdComment(), false);
         savedCommentModel.setCountLikes(countLikes);
         savedCommentModel.setCountDislikes(countDislikes);
         logger.info("Updated comment successfully: {}", savedCommentModel);
@@ -84,8 +86,10 @@ public class CommentService {
                     return new NotFoundException("Comment not found");
                 });
         CommentModel commentModel = commentMapper.toModelFromEntity(comment);
-        Long countLikes = assessmentCommentRepository.countAssessmentCommentsByIdCommentAndLiked(idComment, true);
-        Long countDislikes = assessmentCommentRepository.countAssessmentCommentsByIdCommentAndLiked(idComment, false);
+        Long countLikes = assessmentCommentRepository
+                .countAssessmentCommentsByIdCommentAndLiked(idComment, true);
+        Long countDislikes = assessmentCommentRepository
+                .countAssessmentCommentsByIdCommentAndLiked(idComment, false);
         commentModel.setCountLikes(countLikes);
         commentModel.setCountDislikes(countDislikes);
         logger.info("Found comment: {}", commentModel);
@@ -98,8 +102,10 @@ public class CommentService {
         List<Comment> comments = commentRepository.getCommentsByIdVideo(idVideo);
         List<CommentModel> commentModels = commentMapper.toModelListFromEntityList(comments);
         for (CommentModel commentModel : commentModels) {
-            Long countLikes = assessmentCommentRepository.countAssessmentCommentsByIdCommentAndLiked(commentModel.getIdComment(), true);
-            Long countDislikes = assessmentCommentRepository.countAssessmentCommentsByIdCommentAndLiked(commentModel.getIdComment(), false);
+            Long countLikes = assessmentCommentRepository
+                    .countAssessmentCommentsByIdCommentAndLiked(commentModel.getIdComment(), true);
+            Long countDislikes = assessmentCommentRepository
+                    .countAssessmentCommentsByIdCommentAndLiked(commentModel.getIdComment(), false);
             commentModel.setCountLikes(countLikes);
             commentModel.setCountDislikes(countDislikes);
         }

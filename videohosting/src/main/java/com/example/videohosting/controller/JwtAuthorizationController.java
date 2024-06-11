@@ -43,7 +43,8 @@ public class JwtAuthorizationController {
     public ResponseEntity<JwtResponse> signUp(@Valid @RequestBody CreateUserRequest request) {
         UserModel model = userMapper.toModelFromCreateRequest(request);
         UserModel userModel = userService.insert(model, request.getImageHeader(), request.getImageIcon());
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext()
                 .setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);

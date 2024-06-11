@@ -69,7 +69,8 @@ public class PlaylistController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PlaylistResponse> putPlaylist(@PathVariable Long id, @Valid @RequestBody UpdatePlaylistRequest request) {
+    public ResponseEntity<PlaylistResponse> putPlaylist(
+            @PathVariable Long id, @Valid @RequestBody UpdatePlaylistRequest request) {
         PlaylistModel playlistModel = playlistMapper.toModelFromUpdateRequest(request);
         playlistModel.setIdPlaylist(id);
         PlaylistModel model = playlistService.update(playlistModel, request.getImageIcon());

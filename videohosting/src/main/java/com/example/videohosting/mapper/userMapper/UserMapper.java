@@ -17,7 +17,8 @@ import org.mapstruct.Named;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {VideoMapper.class, PlaylistMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", uses = {VideoMapper.class, PlaylistMapper.class},
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class UserMapper {
     @Named("toUserModel")
     @Mapping(target = "subscriptions", qualifiedByName = "noSubscriptionsInUserModelList")

@@ -47,13 +47,13 @@ class VideoRepositoryTest {
     void getVideosByUser_IdUser() {
         Video video = utils.createAndSaveVideo();
         Long idUser = video.getUser().getIdUser();
-        List<Video> result = repository.getVideosByUser_IdUser(idUser);
+        List<Video> result = repository.getVideosBySubscription(idUser);
         assertEquals(List.of(), result);
     }
 
     @Test
     void getVideosByUser_IdUserNegativeTest() {
-        List<Video> result = repository.getVideosByUser_IdUser(421L);
+        List<Video> result = repository.getVideosBySubscription(421L);
         assertEquals(List.of(), result);
     }
 

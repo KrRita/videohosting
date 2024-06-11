@@ -15,7 +15,8 @@ import org.mapstruct.Named;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = UserWithoutListsMapper.class, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", uses = UserWithoutListsMapper.class,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class PlaylistMapper {
     @Mapping(target = "user", qualifiedByName = "toUserEntityWithoutLists")
     public abstract Playlist toEntity(PlaylistModel model);

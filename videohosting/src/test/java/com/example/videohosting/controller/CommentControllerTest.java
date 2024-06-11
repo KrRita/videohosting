@@ -138,6 +138,5 @@ class CommentControllerTest {
                 comment.getUser().getChannelName(), comment.getText(), comment.getReleaseDateTime(),
                 null, 0L);
         assertEquals(expected, response.getBody());
-
     }
 }

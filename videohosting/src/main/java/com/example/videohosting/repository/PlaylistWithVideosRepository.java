@@ -9,6 +9,7 @@ import java.util.List;
 public interface PlaylistWithVideosRepository extends JpaRepository<PlaylistWithVideos, Long> {
     List<PlaylistWithVideos> getPlaylistWithVideosByIdPlaylist(Long idPlaylist);
     Long countPlaylistWithVideosByIdPlaylist(Long idPlaylist);
-    @Query("SELECT pv.idPlaylistWithVideos FROM PlaylistWithVideos pv WHERE pv.video.idVideo=:idVideo AND pv.idPlaylist=:idPlaylist" )
+    @Query("SELECT pv.idPlaylistWithVideos FROM PlaylistWithVideos pv " +
+           "WHERE pv.video.idVideo=:idVideo AND pv.idPlaylist=:idPlaylist" )
     Long getPlaylistWithVideosByIdPlaylistAndVideo_IdVideo(Long idPlaylist, Long idVideo);
 }

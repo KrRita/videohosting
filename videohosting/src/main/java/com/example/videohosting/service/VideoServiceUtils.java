@@ -6,6 +6,7 @@ import com.example.videohosting.mapper.VideoMapper;
 import com.example.videohosting.model.VideoModel;
 import com.example.videohosting.repository.AssessmentVideoRepository;
 import com.example.videohosting.repository.CategoryRepository;
+import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.ViewedVideoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +20,19 @@ import java.util.List;
 @Component
 public class VideoServiceUtils {
     private final VideoMapper videoMapper;
+    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ViewedVideoRepository viewedVideoRepository;
     private final AssessmentVideoRepository assessmentVideoRepository;
     private final Logger logger = LoggerFactory.getLogger(VideoServiceUtils.class);
 
     @Autowired
-    public VideoServiceUtils(VideoMapper videoMapper, CategoryRepository categoryRepository,
+    public VideoServiceUtils(VideoMapper videoMapper, UserRepository userRepository,
+                             CategoryRepository categoryRepository,
                              ViewedVideoRepository viewedVideoRepository,
                              AssessmentVideoRepository assessmentVideoRepository) {
         this.videoMapper = videoMapper;
+        this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.viewedVideoRepository = viewedVideoRepository;
         this.assessmentVideoRepository = assessmentVideoRepository;
@@ -73,10 +77,14 @@ public class VideoServiceUtils {
     public List<VideoModel> addFieldInModelList(List<VideoModel> videoModels) {
         logger.info("Adding countViews, countLikes and countDislikes to video models");
         for (VideoModel videoModel : videoModels) {
+            videoModel.getUser().setCountSubscribers(
+                    userRepository.getSubscribersCountByIdUser(videoModel.getUser().getIdUser()));
             Long idVideo = videoModel.getIdVideo();
             Long countViews = viewedVideoRepository.countViewedVideosByVideo_IdVideo(idVideo);
-            Long countLikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true);
-            Long countDislikes = assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false);
+            Long countLikes = assessmentVideoRepository
+                    .countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true);
+            Long countDislikes = assessmentVideoRepository
+                    .countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false);
             videoModel.setCountViewing(countViews);
             videoModel.setCountLikes(countLikes);
             videoModel.setCountDislikes(countDislikes);

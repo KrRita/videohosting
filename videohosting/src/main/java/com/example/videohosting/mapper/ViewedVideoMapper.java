@@ -38,6 +38,7 @@ public abstract class ViewedVideoMapper {
         previewVideoResponse.setIdVideo(model.getVideo().getIdVideo());
         previewVideoResponse.setName(model.getVideo().getName());
         previewVideoResponse.setDuration(model.getVideo().getDuration());
+        previewVideoResponse.setDescription(model.getVideo().getDescription());
         previewVideoResponse.setReleaseDateTime(model.getVideo().getReleaseDateTime());
         previewVideoResponse.setCountViewing(model.getVideo().getCountViewing());
         previewVideoResponse.setIdUser(model.getIdUser());

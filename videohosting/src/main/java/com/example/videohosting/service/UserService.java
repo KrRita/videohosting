@@ -5,14 +5,18 @@ import com.example.videohosting.exception.DeleteFileException;
 import com.example.videohosting.exception.NotFoundException;
 import com.example.videohosting.exception.UserAlreadyExistsException;
 import com.example.videohosting.mapper.userMapper.UserMapper;
+import com.example.videohosting.model.PlaylistModel;
 import com.example.videohosting.model.UserModel;
+import com.example.videohosting.model.VideoModel;
+import com.example.videohosting.repository.PlaylistWithVideosRepository;
 import com.example.videohosting.repository.UserRepository;
+import com.example.videohosting.repository.ViewedVideoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,15 +29,21 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final ViewedVideoRepository viewedVideoRepository;
+    private final PlaylistWithVideosRepository playlistWithVideosRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final MediaService mediaService;
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
-    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder,
+    public UserService(UserRepository userRepository, ViewedVideoRepository videoRepository,
+                       PlaylistWithVideosRepository playlistWithVideosRepository,
+                       UserMapper userMapper, PasswordEncoder passwordEncoder,
                        MediaService mediaService) {
         this.userRepository = userRepository;
+        this.viewedVideoRepository = videoRepository;
+        this.playlistWithVideosRepository = playlistWithVideosRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.mediaService = mediaService;
@@ -100,13 +110,17 @@ public class UserService {
         }
         User savedUser = userRepository.save(oldUser);
         UserModel savedUserModel = userMapper.toModel(savedUser);
-        Long countSubscribers = userRepository.getSubscriptionsCountByIdUser(savedUserModel.getIdUser());
+        Long countSubscribers = userRepository.getSubscribersCountByIdUser(savedUserModel.getIdUser());
         savedUserModel.setCountSubscribers(countSubscribers);
         logger.info("User updated successfully with id: {}", savedUser.getIdUser());
         return savedUserModel;
     }
 
-    @CachePut(value = "users", key = "#result.idUser")
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "users", key = "#userModel.subscriptions.get(0).idUser"),
+                    @CacheEvict(value = "users", key = "#userModel.idUser")
+            })
     public UserModel addSubscription(UserModel userModel) {
         logger.info("Adding subscription for user with id: {}", userModel.getIdUser());
         User oldUser = userRepository.findById(userModel.getIdUser())
@@ -118,14 +132,18 @@ public class UserService {
         oldUser.getSubscriptions().addAll(subscriptions);
         User savedUser = userRepository.save(oldUser);
         UserModel savedUserModel = userMapper.toModel(savedUser);
-        Long countSubscribers = userRepository.getSubscriptionsCountByIdUser(savedUserModel.getIdUser());
+        Long countSubscribers = userRepository.getSubscribersCountByIdUser(savedUserModel.getIdUser());
         savedUserModel.setCountSubscribers(countSubscribers);
         logger.info("Subscription with id: {} added successfully for user with id: {}",
                 userModel.getSubscriptions().get(0).getIdUser(), savedUser.getIdUser());
         return savedUserModel;
     }
 
-    @CachePut(value = "users", key = "#result.idUser")
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "users", key = "#userModel.subscriptions.get(0).idUser"),
+                    @CacheEvict(value = "users", key = "#userModel.idUser")
+            })
     public UserModel deleteSubscription(UserModel userModel) {
         logger.info("Deleting subscription for user with id: {}", userModel.getIdUser());
         User oldUser = userRepository.findById(userModel.getIdUser())
@@ -137,7 +155,7 @@ public class UserService {
         oldUser.getSubscriptions().removeIf(user -> user.getIdUser().equals(idSubscription));
         User savedUser = userRepository.save(oldUser);
         UserModel savedUserModel = userMapper.toModel(savedUser);
-        Long countSubscribers = userRepository.getSubscriptionsCountByIdUser(savedUserModel.getIdUser());
+        Long countSubscribers = userRepository.getSubscribersCountByIdUser(savedUserModel.getIdUser());
         savedUserModel.setCountSubscribers(countSubscribers);
         logger.info("Subscription with id: {} deleted successfully for user with id: {}",
                 userModel.getSubscriptions().get(0).getIdUser(), savedUser.getIdUser());
@@ -165,7 +183,8 @@ public class UserService {
         }
     }
 
-    @Cacheable(value = "users", key = "#id")
+    //@Cacheable(value = "users", key = "#id")
+    @Transactional
     public UserModel findUserById(Long id) {
         logger.info("Finding user with id: {}", id);
         User user = userRepository.findById(id)
@@ -174,7 +193,23 @@ public class UserService {
                     return new NotFoundException("User not found");
                 });
         UserModel userModel = userMapper.toModel(user);
-        Long countSubscribers = userRepository.getSubscriptionsCountByIdUser(id);
+        List<UserModel> subscriptions = userModel.getSubscriptions();
+        List<VideoModel> videos = userModel.getVideos();
+        List<PlaylistModel> playlists = userModel.getPlaylists();
+        for (UserModel subscription : subscriptions) {
+            Long count = userRepository.getSubscribersCountByIdUser(subscription.getIdUser());
+            subscription.setCountSubscribers(count);
+        }
+        for (VideoModel video : videos) {
+            Long countViewing = viewedVideoRepository.countViewedVideosByVideo_IdVideo(video.getIdVideo());
+            video.setCountViewing(countViewing);
+        }
+        for (PlaylistModel playlist : playlists) {
+            Long countVideos = playlistWithVideosRepository
+                    .countPlaylistWithVideosByIdPlaylist(playlist.getIdPlaylist());
+            playlist.setCountVideos(countVideos);
+        }
+        Long countSubscribers = userRepository.getSubscribersCountByIdUser(id);
         userModel.setCountSubscribers(countSubscribers);
         logger.info("Found user with id: {}", id);
         return userModel;

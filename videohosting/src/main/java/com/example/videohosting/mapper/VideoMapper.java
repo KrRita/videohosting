@@ -17,7 +17,8 @@ import org.mapstruct.Named;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = UserWithoutListsMapper.class, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", uses = UserWithoutListsMapper.class,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class VideoMapper {
     @Named("toVideoModel")
     @Mapping(target = "user", qualifiedByName = "toUserModelWithoutLists")

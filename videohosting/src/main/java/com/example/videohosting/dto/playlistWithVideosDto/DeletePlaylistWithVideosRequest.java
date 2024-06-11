@@ -1,6 +1,5 @@
 package com.example.videohosting.dto.playlistWithVideosDto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class DeletePlaylistWithVideosRequest {

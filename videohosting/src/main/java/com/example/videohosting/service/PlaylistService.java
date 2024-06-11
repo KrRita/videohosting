@@ -27,7 +27,8 @@ public class PlaylistService {
 
     @Autowired
     public PlaylistService(PlaylistRepository playlistRepository, PlaylistMapper playlistMapper,
-                           PlaylistWithVideosRepository playlistWithVideosRepository, MediaService mediaService) {
+                           PlaylistWithVideosRepository playlistWithVideosRepository,
+                           MediaService mediaService) {
         this.playlistRepository = playlistRepository;
         this.playlistMapper = playlistMapper;
         this.playlistWithVideosRepository = playlistWithVideosRepository;
@@ -69,7 +70,8 @@ public class PlaylistService {
         }
         Playlist savedPlaylist = playlistRepository.save(oldPlaylist);
         PlaylistModel savedPlaylistModel = playlistMapper.toModel(savedPlaylist);
-        Long countVideos = playlistWithVideosRepository.countPlaylistWithVideosByIdPlaylist(savedPlaylist.getIdPlaylist());
+        Long countVideos = playlistWithVideosRepository
+                .countPlaylistWithVideosByIdPlaylist(savedPlaylist.getIdPlaylist());
         savedPlaylistModel.setCountVideos(countVideos);
         logger.info("Playlist updated successfully with id: {}", savedPlaylist.getIdPlaylist());
         return savedPlaylistModel;

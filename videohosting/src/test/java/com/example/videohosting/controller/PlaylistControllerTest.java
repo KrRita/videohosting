@@ -12,8 +12,6 @@ import com.example.videohosting.entity.PlaylistWithVideos;
 import com.example.videohosting.entity.User;
 import com.example.videohosting.entity.Video;
 import com.example.videohosting.exception.NotFoundException;
-import com.example.videohosting.model.PlaylistWithVideosModel;
-import com.example.videohosting.service.VideoService;
 import com.example.videohosting.utils.PlaylistUtils;
 import com.example.videohosting.utils.PlaylistWithVideosUtils;
 import com.example.videohosting.utils.UserUtils;
@@ -34,7 +32,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.sql.Timestamp;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Testcontainers
@@ -59,8 +58,7 @@ class PlaylistControllerTest {
     private UserUtils userUtils;
     @Autowired
     private VideoUtils videoUtils;
-    @Autowired
-    private VideoService videoService;
+
     @Autowired
     private PlaylistWithVideosUtils playlistWithVideosUtils;
 

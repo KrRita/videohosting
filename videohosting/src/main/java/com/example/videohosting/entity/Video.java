@@ -13,7 +13,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.util.List;
 
 @Entity

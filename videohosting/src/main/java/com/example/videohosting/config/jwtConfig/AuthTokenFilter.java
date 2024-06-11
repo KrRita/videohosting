@@ -24,7 +24,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private CustomUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         String jwt = parseJwt(request);
         if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
             String email = jwtUtils.getEmailFromJwtToken(jwt);

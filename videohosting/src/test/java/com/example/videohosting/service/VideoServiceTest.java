@@ -293,7 +293,7 @@ class VideoServiceTest {
     void getSubscriptionsVideos() {
         createAndSaveSubscription();
         Long id = video.getUser().getIdUser();
-        when(videoRepository.getVideosByUser_IdUser(id)).thenReturn(videos);
+        when(videoRepository.getVideosBySubscription(id)).thenReturn(videos);
         when(videoServiceUtils.getVideoModelListWithCategories(videos)).thenReturn(videoModels);
         when(videoServiceUtils.addFieldInModelList(videoModels)).thenReturn(videoModels);
 

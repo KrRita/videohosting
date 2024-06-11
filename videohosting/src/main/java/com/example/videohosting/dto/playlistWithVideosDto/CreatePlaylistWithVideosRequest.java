@@ -2,8 +2,6 @@ package com.example.videohosting.dto.playlistWithVideosDto;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.sql.Timestamp;
-
 public class CreatePlaylistWithVideosRequest {
     @NotNull
     private Long idVideo;

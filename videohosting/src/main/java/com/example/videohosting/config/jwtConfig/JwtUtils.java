@@ -1,7 +1,6 @@
 package com.example.videohosting.config.jwtConfig;
 
 import com.example.videohosting.model.UserModel;
-import com.example.videohosting.service.CommentService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;

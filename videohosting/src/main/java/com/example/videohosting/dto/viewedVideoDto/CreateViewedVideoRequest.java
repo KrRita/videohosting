@@ -2,8 +2,6 @@ package com.example.videohosting.dto.viewedVideoDto;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.sql.Timestamp;
-
 public class CreateViewedVideoRequest {
     @NotNull
     private Long idUser;

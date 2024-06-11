@@ -13,6 +13,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -44,9 +48,28 @@ class UserRepositoryTest {
     @Test
     void getSubscriptionsCountByIdUser() {
         User user = utils.createAndSaveUser();
-        Long count = userRepository.getSubscriptionsCountByIdUser(user.getIdUser());
+        Long count = userRepository.getSubscribersCountByIdUser(user.getIdUser());
         assertEquals(1L, count);
 
+    }
+
+    @Test
+    void getSubscriptionsCountManyByIdUser() {
+        User user = utils.createAndSaveUser();
+        User newUser = new User();
+        newUser.setEmail("usenjdncdnjkdr@example.com");
+        newUser.setChannelName("Chcdmcdkdkmannel");
+        newUser.setDescription("Demdckdmckdmckdscription");
+        newUser.setDateOfRegistration(new Timestamp(System.currentTimeMillis()));
+        newUser.setPassword("pasmdckmkdsword123");
+        List<User> list = new ArrayList<>();
+        list.add(user);
+        newUser.setSubscriptions(list);
+        newUser.setVideos(List.of());
+        newUser.setPlaylists(List.of());
+        userRepository.save(newUser);
+        Long count = userRepository.getSubscribersCountByIdUser(user.getIdUser());
+        assertEquals(2L, count);
     }
 
     @Transactional

@@ -3,7 +3,6 @@ package com.example.videohosting.dto.assessementVideoDto;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.sql.Timestamp;
 import java.util.Objects;
 
 public class CreateAssessmentVideoRequest {
