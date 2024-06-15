@@ -8,7 +8,6 @@ import com.example.videohosting.dto.videoDto.PreviewVideoResponse;
 import com.example.videohosting.dto.videoDto.UpdateVideoRequest;
 import com.example.videohosting.dto.videoDto.VideoResponse;
 import com.example.videohosting.dto.viewedVideoDto.CreateViewedVideoRequest;
-import com.example.videohosting.exception.LoadFileException;
 import com.example.videohosting.mapper.AssessmentVideoMapper;
 import com.example.videohosting.mapper.CommentMapper;
 import com.example.videohosting.mapper.VideoMapper;
@@ -18,13 +17,14 @@ import com.example.videohosting.model.CommentModel;
 import com.example.videohosting.model.VideoModel;
 import com.example.videohosting.model.ViewedVideoModel;
 import com.example.videohosting.service.CommentService;
-import com.example.videohosting.service.MediaService;
 import com.example.videohosting.service.VideoService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.jcodec.api.JCodecException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +34,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,39 +50,42 @@ public class VideoController {
     private final ViewedVideoMapper viewedVideoMapper;
     private final CommentService commentService;
     private final CommentMapper commentMapper;
-    private final MediaService mediaService;
 
     @Autowired
     public VideoController(VideoService videoService, VideoMapper videoMapper,
                            AssessmentVideoMapper assessmentVideoMapper, ViewedVideoMapper viewedVideoMapper,
-                           CommentService commentService, CommentMapper commentMapper, MediaService mediaService) {
+                           CommentService commentService, CommentMapper commentMapper) {
         this.videoService = videoService;
         this.videoMapper = videoMapper;
         this.assessmentVideoMapper = assessmentVideoMapper;
         this.viewedVideoMapper = viewedVideoMapper;
         this.commentService = commentService;
         this.commentMapper = commentMapper;
-        this.mediaService = mediaService;
     }
 
-    @PostMapping()
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<VideoResponse> postVideo
-            (@Valid @RequestBody CreateVideoRequest request) throws JCodecException, IOException {
-        VideoModel model = videoMapper.toModelFromCreateRequest(request);
-        VideoModel videoModel = videoService.insertVideo(model, request.getVideoFile(), request.getPreviewImage());
+            (@Valid @RequestPart(value = "request", required = true) String request,
+             @RequestPart(value = "video", required = true) MultipartFile video,
+             @RequestPart(value = "preview", required = true) MultipartFile preview) throws JCodecException, IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        CreateVideoRequest createVideoRequest = objectMapper.readValue(request, CreateVideoRequest.class);
+        VideoModel model = videoMapper.toModelFromCreateRequest(createVideoRequest);
+        VideoModel videoModel = videoService.insertVideo(model, video, preview);
         VideoResponse response = videoMapper.toVideoResponseFromModel(videoModel);
-        addVideoAndUserPreview(response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PutMapping("/{id}")
+
+    @PutMapping(value = "/updateVideo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<VideoResponse> putVideo(
-            @PathVariable Long id, @Valid @RequestBody UpdateVideoRequest request) {
-        VideoModel model = videoMapper.toModelFromUpdateRequest(request);
-        model.setIdVideo(id);
-        VideoModel videoModel = videoService.updateVideo(model, request.getPreviewImage());
+            @Valid @RequestPart(value = "request", required = true) String request,
+            @RequestPart(value = "preview", required = true) MultipartFile preview) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        UpdateVideoRequest updateRequest = objectMapper.readValue(request, UpdateVideoRequest.class);
+        VideoModel model = videoMapper.toModelFromUpdateRequest(updateRequest);
+        VideoModel videoModel = videoService.updateVideo(model, preview);
         VideoResponse response = videoMapper.toVideoResponseFromModel(videoModel);
-        addVideoAndUserPreview(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -94,7 +99,6 @@ public class VideoController {
     public ResponseEntity<VideoResponse> getVideoById(@PathVariable Long id) {
         VideoModel videoModel = videoService.findVideoById(id);
         VideoResponse response = videoMapper.toVideoResponseFromModel(videoModel);
-        addVideoAndUserPreview(response);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -102,7 +106,6 @@ public class VideoController {
     public ResponseEntity<List<PreviewVideoResponse>> getVideosByName(@RequestParam String videoName) {
         List<VideoModel> models = videoService.getVideosByName(videoName);
         List<PreviewVideoResponse> responses = videoMapper.toListPreviewVideoResponseFromListModel(models);
-        addVideoPreview(responses);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -110,7 +113,6 @@ public class VideoController {
     public ResponseEntity<List<PreviewVideoResponse>> getVideosByUserName(@RequestParam String userName) {
         List<VideoModel> models = videoService.getVideosByUserName(userName);
         List<PreviewVideoResponse> responses = videoMapper.toListPreviewVideoResponseFromListModel(models);
-        addVideoPreview(responses);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -118,7 +120,6 @@ public class VideoController {
     public ResponseEntity<List<PreviewVideoResponse>> getVideosByCategories(@RequestParam List<String> categories) {
         List<VideoModel> models = videoService.getVideosByCategories(categories);
         List<PreviewVideoResponse> responses = videoMapper.toListPreviewVideoResponseFromListModel(models);
-        addVideoPreview(responses);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -130,7 +131,6 @@ public class VideoController {
         model.setVideo(video);
         VideoModel videoModel = videoService.insertAssessmentVideo(model);
         VideoResponse response = videoMapper.toVideoResponseFromModel(videoModel);
-        addVideoAndUserPreview(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -139,7 +139,6 @@ public class VideoController {
             @PathVariable Long idVideo, @Valid @RequestBody DeleteAssessmentVideoRequest request) {
         VideoModel model = videoService.deleteAssessmentVideo(request.getIdUser(), idVideo);
         VideoResponse response = videoMapper.toVideoResponseFromModel(model);
-        addVideoAndUserPreview(response);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -150,7 +149,6 @@ public class VideoController {
         model.getVideo().setIdVideo(idVideo);
         VideoModel videoModel = videoService.insertViewedVideo(model);
         VideoResponse response = videoMapper.toVideoResponseFromModel(videoModel);
-        addVideoAndUserPreview(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -161,28 +159,5 @@ public class VideoController {
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
-    private void addVideoAndUserPreview(VideoResponse response) {
-        String videoPath = "video\\" + response.getIdVideo() + ".mp4";
-        String userPreviewPath = "imageIconUser\\" + response.getPreviewUserResponse().getIdUser() + ".jpeg";
-        try {
-            Resource video = mediaService.getMedia(videoPath);
-            Resource preview = mediaService.getMedia(userPreviewPath);
-            response.getPreviewUserResponse().setImageIcon(preview);
-            response.setVideoFile(video);
-        } catch (LoadFileException ex) {
-            response.getPreviewUserResponse().setImageIcon(null);
-        }
-    }
 
-    private void addVideoPreview(List<PreviewVideoResponse> responses) {
-        for (PreviewVideoResponse response : responses) {
-            String videoPreview = "previewVideo\\" + response.getIdVideo() + ".jpeg";
-            try {
-                Resource preview = mediaService.getMedia(videoPreview);
-                response.setPreviewImage(preview);
-            } catch (LoadFileException ex) {
-                response.setPreviewImage(null);
-            }
-        }
-    }
 }

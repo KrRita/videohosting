@@ -35,6 +35,7 @@ public class PlaylistService {
         this.mediaService = mediaService;
     }
 
+
     public PlaylistModel insert(PlaylistModel playlistModel, MultipartFile imageIcon) {
         logger.info("Inserting new playlist: {}", playlistModel.getNamePlaylist());
         playlistModel.setDateCreation(Timestamp.valueOf(LocalDateTime.now()));

@@ -62,6 +62,10 @@ class UserServiceTest {
         userModel.setDateOfRegistration(dateTime);
         userModel.setPassword("password");
         userModel.setCountSubscribers(0L);
+        userModel.setPlaylists(new ArrayList<>());
+        userModel.setSubscriptions(new ArrayList<>());
+        userModel.setVideos(new ArrayList<>());
+
 
         user = new User();
         user.setIdUser(1L);
@@ -70,6 +74,9 @@ class UserServiceTest {
         user.setDescription("Test Description");
         user.setDateOfRegistration(dateTime);
         user.setPassword("password");
+        user.setPlaylists(new ArrayList<>());
+        user.setSubscriptions(new ArrayList<>());
+        user.setVideos(new ArrayList<>());
     }
 
     @Test
@@ -210,7 +217,7 @@ class UserServiceTest {
         when(userMapper.toModel(user)).thenReturn(userModel);
         when(userRepository.getSubscribersCountByIdUser(id)).thenReturn(0L);
 
-        UserModel result = userService.findUserById(1L);
+        UserModel result = userService.findUserById(id);
         assertEquals(userModel, result);
     }
 

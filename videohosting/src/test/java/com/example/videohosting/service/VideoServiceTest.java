@@ -20,6 +20,7 @@ import com.example.videohosting.model.VideoModel;
 import com.example.videohosting.model.ViewedVideoModel;
 import com.example.videohosting.repository.AssessmentVideoRepository;
 import com.example.videohosting.repository.PlaylistWithVideosRepository;
+import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.VideoRepository;
 import com.example.videohosting.repository.ViewedVideoRepository;
 import org.jcodec.api.JCodecException;
@@ -52,6 +53,8 @@ import static org.mockito.Mockito.when;
 class VideoServiceTest {
     @Mock
     private VideoRepository videoRepository;
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private VideoMapper videoMapper;
@@ -204,6 +207,7 @@ class VideoServiceTest {
         when(mediaService.getDuration(videoPath)).thenReturn(1200L);
         when(videoServiceUtils.toCategoryEntityList(videoModel.getCategories())).thenReturn(new ArrayList<>());
         when(videoServiceUtils.toCategoryStringList(video.getCategories())).thenReturn(new ArrayList<>());
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
         VideoModel savedVideoModel = videoService.insertVideo(videoModel, videoFile, previewImage);
         assertEquals(videoModel, savedVideoModel);
         verify(mediaService).saveMedia(previewImage, pathPreview);
@@ -231,6 +235,7 @@ class VideoServiceTest {
         when(viewedVideoRepository.countViewedVideosByVideo_IdVideo(id)).thenReturn(0L);
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, true)).thenReturn(0L);
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, false)).thenReturn(0L);
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
         VideoModel updatedVideoModel = videoService.updateVideo(videoModel, previewImage);
 
@@ -250,6 +255,7 @@ class VideoServiceTest {
         when(viewedVideoRepository.countViewedVideosByVideo_IdVideo(id)).thenReturn(0L);
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, true)).thenReturn(0L);
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, false)).thenReturn(0L);
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
         VideoModel updatedVideoModel = videoService.updateVideo(videoModel, previewImage);
 
@@ -276,6 +282,7 @@ class VideoServiceTest {
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(id, false)).thenReturn(0L);
         when(videoMapper.toModel(video)).thenReturn(videoModel);
         when(videoServiceUtils.toCategoryStringList(video.getCategories())).thenReturn(new ArrayList<>());
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
         VideoModel foundVideoModel = videoService.findVideoById(id);
 
         assertEquals(videoModel, foundVideoModel);
@@ -324,6 +331,7 @@ class VideoServiceTest {
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true)).thenReturn(0L);
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false)).thenReturn(0L);
         when(videoServiceUtils.toCategoryStringList(video.getCategories())).thenReturn(new ArrayList<>());
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
         List<ViewedVideoModel> result = videoService.getViewedVideos(idUser);
 
@@ -399,6 +407,7 @@ class VideoServiceTest {
         when(assessmentVideoRepository.save(assessmentVideo)).thenReturn(assessmentVideo);
         when(videoRepository.findById(id)).thenReturn(Optional.of(video));
         when(videoMapper.toModel(video)).thenReturn(videoModel);
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
         VideoModel returnedVideoModel = videoService.insertAssessmentVideo(assessmentVideoModel);
 
@@ -415,6 +424,7 @@ class VideoServiceTest {
         when(assessmentVideoRepository.getAssessmentVideoByIdUserAndVideo_IdVideo(idUser, idVideo)).thenReturn(id);
         when(videoRepository.findById(id)).thenReturn(Optional.of(video));
         when(videoMapper.toModel(video)).thenReturn(videoModel);
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
 
         VideoModel returnedVideoModel = videoService.deleteAssessmentVideo(idUser, idVideo);
@@ -436,6 +446,7 @@ class VideoServiceTest {
         when(viewedVideoRepository.save(viewedVideo)).thenReturn(viewedVideo);
         when(videoRepository.findById(id)).thenReturn(Optional.of(video));
         when(videoMapper.toModel(video)).thenReturn(videoModel);
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
         VideoModel returnedVideoModel = videoService.insertViewedVideo(viewedVideoModel);
 
@@ -473,6 +484,7 @@ class VideoServiceTest {
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true)).thenReturn(0L);
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false)).thenReturn(0L);
         when(videoServiceUtils.toCategoryStringList(video.getCategories())).thenReturn(new ArrayList<>());
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
         List<PlaylistWithVideosModel> result = videoService.getVideosFromPlaylist(idPlaylist);
 
@@ -493,6 +505,7 @@ class VideoServiceTest {
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true)).thenReturn(0L);
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false)).thenReturn(0L);
         when(videoServiceUtils.toCategoryStringList(video.getCategories())).thenReturn(new ArrayList<>());
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
         List<PlaylistWithVideosModel> result = videoService.insertPlaylistWithVideos(playlistWithVideosModel);
 
@@ -514,6 +527,7 @@ class VideoServiceTest {
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, true)).thenReturn(0L);
         when(assessmentVideoRepository.countAssessmentVideosByVideo_IdVideoAndLiked(idVideo, false)).thenReturn(0L);
         when(videoServiceUtils.toCategoryStringList(video.getCategories())).thenReturn(new ArrayList<>());
+        when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
 
         List<PlaylistWithVideosModel> result = videoService.deletePlaylistWithVideos(1L, 1L);
 

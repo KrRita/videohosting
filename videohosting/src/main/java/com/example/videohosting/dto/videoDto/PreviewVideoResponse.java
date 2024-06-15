@@ -21,7 +21,6 @@ public class PreviewVideoResponse {
     @Size(max = 1000)
     private String description;
 
-    private Resource previewImage;
     @NotNull
     @Past
     private Timestamp releaseDateTime;
@@ -34,13 +33,12 @@ public class PreviewVideoResponse {
     @Size(max = 40)
     private String userName;
 
-    public PreviewVideoResponse(Long idVideo, String name, Long duration, String description, Resource previewImage,
+    public PreviewVideoResponse(Long idVideo, String name, Long duration, String description,
                                 Timestamp releaseDateTime, Long countViewing, Long idUser, String userName) {
         this.idVideo = idVideo;
         this.name = name;
         this.duration = duration;
         this.description = description;
-        this.previewImage = previewImage;
         this.releaseDateTime = releaseDateTime;
         this.countViewing = countViewing;
         this.idUser = idUser;
@@ -73,15 +71,6 @@ public class PreviewVideoResponse {
     public void setDuration(Long duration) {
         this.duration = duration;
     }
-
-    public Resource getPreviewImage() {
-        return previewImage;
-    }
-
-    public void setPreviewImage(Resource previewImage) {
-        this.previewImage = previewImage;
-    }
-
     public Timestamp getReleaseDateTime() {
         return releaseDateTime;
     }
@@ -133,7 +122,6 @@ public class PreviewVideoResponse {
         if (!Objects.equals(name, that.name)) return false;
         if (!Objects.equals(duration, that.duration)) return false;
         if (!Objects.equals(description, that.description)) return false;
-        if (!Objects.equals(previewImage, that.previewImage)) return false;
         if (!Objects.equals(releaseDateTime, that.releaseDateTime))
             return false;
         if (!Objects.equals(countViewing, that.countViewing)) return false;
@@ -147,7 +135,6 @@ public class PreviewVideoResponse {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (duration != null ? duration.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (previewImage != null ? previewImage.hashCode() : 0);
         result = 31 * result + (releaseDateTime != null ? releaseDateTime.hashCode() : 0);
         result = 31 * result + (countViewing != null ? countViewing.hashCode() : 0);
         result = 31 * result + (idUser != null ? idUser.hashCode() : 0);
@@ -162,7 +149,6 @@ public class PreviewVideoResponse {
                ", name='" + name + '\'' +
                ", duration=" + duration +
                ", description='" + description + '\'' +
-               ", previewImage='" + previewImage + '\'' +
                ", releaseDateTime=" + releaseDateTime +
                ", countViewing=" + countViewing +
                ", idUser=" + idUser +

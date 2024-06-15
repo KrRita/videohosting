@@ -193,10 +193,6 @@ public class UserModel implements UserDetails {
                ", channelName='" + channelName + '\'' +
                ", description='" + description + '\'' +
                ", dateOfRegistration=" + dateOfRegistration +
-               ", password='" + password + '\'' +
-               ", subscriptions=" + subscriptions +
-               ", videoModels=" + videos +
-               ", playlistModels=" + playlists +
                ", countSubscribers=" + countSubscribers +
                '}';
     }

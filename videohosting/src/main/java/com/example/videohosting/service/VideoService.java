@@ -3,6 +3,7 @@ package com.example.videohosting.service;
 import com.example.videohosting.entity.AssessmentVideo;
 import com.example.videohosting.entity.Category;
 import com.example.videohosting.entity.PlaylistWithVideos;
+import com.example.videohosting.entity.User;
 import com.example.videohosting.entity.Video;
 import com.example.videohosting.entity.ViewedVideo;
 import com.example.videohosting.exception.DeleteFileException;
@@ -86,6 +87,9 @@ public class VideoService {
         }
         videoModel.setReleaseDateTime(Timestamp.valueOf(LocalDateTime.now()));
         Video video = videoMapper.toEntity(videoModel);
+        User user = userRepository.findById(video.getUser().getIdUser())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        video.setUser(user);
         video.setCategories(videoServiceUtils.toCategoryEntityList(videoModel.getCategories()));
         Video savedVideo = videoRepository.save(video);
         if (preview != null) {

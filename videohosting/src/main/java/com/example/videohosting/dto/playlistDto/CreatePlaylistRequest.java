@@ -13,12 +13,10 @@ public class CreatePlaylistRequest {
     @NotBlank
     @Size(max = 100)
     private String namePlaylist;
-    private MultipartFile imageIconFile;
 
-    public CreatePlaylistRequest(Long idUser, String namePlaylist, MultipartFile imageIconFile) {
+    public CreatePlaylistRequest(Long idUser, String namePlaylist) {
         this.idUser = idUser;
         this.namePlaylist = namePlaylist;
-        this.imageIconFile = imageIconFile;
     }
 
     public CreatePlaylistRequest() {
@@ -40,14 +38,6 @@ public class CreatePlaylistRequest {
         this.namePlaylist = namePlaylist;
     }
 
-    public MultipartFile getImageIconFile() {
-        return imageIconFile;
-    }
-
-    public void setImageIconFile(MultipartFile imageIconFile) {
-        this.imageIconFile = imageIconFile;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -56,15 +46,13 @@ public class CreatePlaylistRequest {
         CreatePlaylistRequest that = (CreatePlaylistRequest) o;
 
         if (!idUser.equals(that.idUser)) return false;
-        if (!namePlaylist.equals(that.namePlaylist)) return false;
-        return Objects.equals(imageIconFile, that.imageIconFile);
+        return namePlaylist.equals(that.namePlaylist);
     }
 
     @Override
     public int hashCode() {
         int result = idUser.hashCode();
         result = 31 * result + namePlaylist.hashCode();
-        result = 31 * result + (imageIconFile != null ? imageIconFile.hashCode() : 0);
         return result;
     }
 
@@ -73,7 +61,6 @@ public class CreatePlaylistRequest {
         return "CreatePlaylistRequest{" +
                "idUser=" + idUser +
                ", namePlaylist='" + namePlaylist + '\'' +
-               ", imageIcon='" + imageIconFile + '\'' +
                '}';
     }
 }

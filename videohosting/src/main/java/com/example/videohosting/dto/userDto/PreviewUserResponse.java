@@ -14,15 +14,13 @@ public class PreviewUserResponse {
     @NotBlank
     @Size(max = 40)
     private String channelName;
-    private Resource imageIcon;
     @NotNull
     @PositiveOrZero
     private Long countSubscribers;
 
-    public PreviewUserResponse(Long idUser, String channelName, Resource imageIcon, Long countSubscribers) {
+    public PreviewUserResponse(Long idUser, String channelName, Long countSubscribers) {
         this.idUser = idUser;
         this.channelName = channelName;
-        this.imageIcon = imageIcon;
         this.countSubscribers = countSubscribers;
     }
 
@@ -45,14 +43,6 @@ public class PreviewUserResponse {
         this.channelName = channelName;
     }
 
-    public Resource getImageIcon() {
-        return imageIcon;
-    }
-
-    public void setImageIcon(Resource imageIcon) {
-        this.imageIcon = imageIcon;
-    }
-
     public Long getCountSubscribers() {
         return countSubscribers;
     }
@@ -70,7 +60,6 @@ public class PreviewUserResponse {
 
         if (!idUser.equals(that.idUser)) return false;
         if (!channelName.equals(that.channelName)) return false;
-        if (!Objects.equals(imageIcon, that.imageIcon)) return false;
         return countSubscribers.equals(that.countSubscribers);
     }
 
@@ -78,7 +67,6 @@ public class PreviewUserResponse {
     public int hashCode() {
         int result = idUser.hashCode();
         result = 31 * result + channelName.hashCode();
-        result = 31 * result + (imageIcon != null ? imageIcon.hashCode() : 0);
         result = 31 * result + countSubscribers.hashCode();
         return result;
     }
@@ -88,7 +76,6 @@ public class PreviewUserResponse {
         return "PreviewUserResponse{" +
                "idUser=" + idUser +
                ", name='" + channelName + '\'' +
-               ", imageIcon='" + imageIcon + '\'' +
                ", countSubscribers=" + countSubscribers +
                '}';
     }

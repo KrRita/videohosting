@@ -173,10 +173,6 @@ public class User {
                ", channelName='" + channelName + '\'' +
                ", description='" + description + '\'' +
                ", dateOfRegistration=" + dateOfRegistration +
-               ", password='" + password + '\'' +
-               ", subscriptions=" + subscriptions +
-               ", videos=" + videos +
-               ", playlists=" + playlists +
                '}';
     }
 }

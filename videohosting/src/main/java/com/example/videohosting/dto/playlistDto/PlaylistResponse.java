@@ -20,17 +20,15 @@ public class PlaylistResponse {
     @NotNull
     @Past
     private Timestamp dateCreation;
-    private Resource imageIcon;
     @NotNull
     @PositiveOrZero
     private Long countVideos;
 
     public PlaylistResponse(Long idPlaylist, String namePlaylist, Timestamp dateCreation,
-                            Resource imageIcon, Long countVideos) {
+                             Long countVideos) {
         this.idPlaylist = idPlaylist;
         this.namePlaylist = namePlaylist;
         this.dateCreation = dateCreation;
-        this.imageIcon = imageIcon;
         this.countVideos = countVideos;
     }
 
@@ -61,14 +59,6 @@ public class PlaylistResponse {
         this.dateCreation = dateCreation;
     }
 
-    public Resource getImageIcon() {
-        return imageIcon;
-    }
-
-    public void setImageIcon(Resource imageIcon) {
-        this.imageIcon = imageIcon;
-    }
-
     public Long getCountVideos() {
         return countVideos;
     }
@@ -89,7 +79,6 @@ public class PlaylistResponse {
             return false;
         if (!Objects.equals(dateCreation, response.dateCreation))
             return false;
-        if (!Objects.equals(imageIcon, response.imageIcon)) return false;
         return Objects.equals(countVideos, response.countVideos);
     }
 
@@ -98,7 +87,6 @@ public class PlaylistResponse {
         int result = idPlaylist != null ? idPlaylist.hashCode() : 0;
         result = 31 * result + (namePlaylist != null ? namePlaylist.hashCode() : 0);
         result = 31 * result + (dateCreation != null ? dateCreation.hashCode() : 0);
-        result = 31 * result + (imageIcon != null ? imageIcon.hashCode() : 0);
         result = 31 * result + (countVideos != null ? countVideos.hashCode() : 0);
         return result;
     }
@@ -108,7 +96,6 @@ public class PlaylistResponse {
                "idPlaylist=" + idPlaylist +
                ", namePlaylist='" + namePlaylist + '\'' +
                ", dateCreation=" + dateCreation +
-               ", imageIcon='" + imageIcon + '\'' +
                ", countVideos=" + countVideos +
                '}';
     }

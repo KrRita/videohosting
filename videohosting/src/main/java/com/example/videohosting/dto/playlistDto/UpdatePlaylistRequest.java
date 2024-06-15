@@ -1,18 +1,22 @@
 package com.example.videohosting.dto.playlistDto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
 
 public class UpdatePlaylistRequest {
+    @NotNull
+    @Positive
+    private Long idPlaylist;
     @Size(max = 100)
     private String namePlaylist;
-    private MultipartFile imageIcon;
 
-    public UpdatePlaylistRequest(String namePlaylist, MultipartFile imageIcon) {
+    public UpdatePlaylistRequest(Long idPlaylist, String namePlaylist) {
+        this.idPlaylist = idPlaylist;
         this.namePlaylist = namePlaylist;
-        this.imageIcon = imageIcon;
     }
 
     public UpdatePlaylistRequest() {
@@ -25,12 +29,12 @@ public class UpdatePlaylistRequest {
         this.namePlaylist = namePlaylist;
     }
 
-    public MultipartFile getImageIcon() {
-        return imageIcon;
+    public Long getIdPlaylist() {
+        return idPlaylist;
     }
 
-    public void setImageIcon(MultipartFile imageIcon) {
-        this.imageIcon = imageIcon;
+    public void setIdPlaylist(Long idPlaylist) {
+        this.idPlaylist = idPlaylist;
     }
 
     @Override
@@ -38,24 +42,24 @@ public class UpdatePlaylistRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        UpdatePlaylistRequest that = (UpdatePlaylistRequest) o;
+        UpdatePlaylistRequest request = (UpdatePlaylistRequest) o;
 
-        if (!Objects.equals(namePlaylist, that.namePlaylist)) return false;
-        return Objects.equals(imageIcon, that.imageIcon);
+        if (!Objects.equals(idPlaylist, request.idPlaylist)) return false;
+        return Objects.equals(namePlaylist, request.namePlaylist);
     }
 
     @Override
     public int hashCode() {
-        int result = namePlaylist != null ? namePlaylist.hashCode() : 0;
-        result = 31 * result + (imageIcon != null ? imageIcon.hashCode() : 0);
+        int result = idPlaylist != null ? idPlaylist.hashCode() : 0;
+        result = 31 * result + (namePlaylist != null ? namePlaylist.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "UpdatePlaylistRequest{" +
-               "namePlaylist='" + namePlaylist + '\'' +
-               ", imageIcon='" + imageIcon + '\'' +
+               "idPlaylist=" + idPlaylist +
+               ", namePlaylist='" + namePlaylist + '\'' +
                '}';
     }
 }

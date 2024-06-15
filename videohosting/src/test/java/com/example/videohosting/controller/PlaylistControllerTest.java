@@ -16,6 +16,8 @@ import com.example.videohosting.utils.PlaylistUtils;
 import com.example.videohosting.utils.PlaylistWithVideosUtils;
 import com.example.videohosting.utils.UserUtils;
 import com.example.videohosting.utils.VideoUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +60,7 @@ class PlaylistControllerTest {
     private UserUtils userUtils;
     @Autowired
     private VideoUtils videoUtils;
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private PlaylistWithVideosUtils playlistWithVideosUtils;
 
@@ -70,30 +72,30 @@ class PlaylistControllerTest {
     }
 
     @Test
-    void postPlaylist() {
+    void postPlaylist() throws JsonProcessingException {
         User user = userUtils.createAndSaveUser();
         String name = "test";
         CreatePlaylistRequest request =
-                new CreatePlaylistRequest(user.getIdUser(), name, null);
-        ResponseEntity<PlaylistResponse> response = playlistController.postPlaylist(request);
-        response.getBody().setIdPlaylist(null);
-        response.getBody().setDateCreation(null);
+                new CreatePlaylistRequest(user.getIdUser(), name);
+        String stringRequest = objectMapper.writeValueAsString(request);
+        PlaylistResponse response = playlistController.postPlaylist(stringRequest,null).getBody();
+        assert response != null;
         PlaylistResponse expected =
-                new PlaylistResponse(null, name, null, null, 0L);
-        assertEquals(expected, response.getBody());
+                new PlaylistResponse(response.getIdPlaylist(), name, response.getDateCreation(), 0L);
+        assertEquals(expected, response);
     }
 
     @Test
-    void putPlaylist() {
+    void putPlaylist() throws JsonProcessingException {
         Playlist playlist = playlistUtils.createAndSavePlaylist();
         Long idPlaylist = playlist.getIdPlaylist();
         String newName = "new playlist";
-        UpdatePlaylistRequest request = new UpdatePlaylistRequest(newName, null);
-        ResponseEntity<PlaylistResponse> response = playlistController.putPlaylist(idPlaylist, request);
-        response.getBody().setCountVideos(null);
-        PlaylistResponse expected = new PlaylistResponse(idPlaylist, newName, playlist.getDateCreation(),
-                null, null);
-        assertEquals(expected, response.getBody());
+        UpdatePlaylistRequest request = new UpdatePlaylistRequest(idPlaylist, newName);
+        String stringRequest = objectMapper.writeValueAsString(request);
+        PlaylistResponse response = playlistController.putPlaylist(stringRequest, null).getBody();
+        assert response != null;
+        PlaylistResponse expected = new PlaylistResponse(idPlaylist, newName, playlist.getDateCreation(), response.getCountVideos());
+        assertEquals(expected, response);
     }
 
     @Test
@@ -108,10 +110,9 @@ class PlaylistControllerTest {
     void getPlaylistById() {
         Playlist playlist = playlistUtils.createAndSavePlaylist();
         Long idPlaylist = playlist.getIdPlaylist();
-        PlaylistResponse expected = new PlaylistResponse(idPlaylist, playlist.getNamePlaylist(),
-                playlist.getDateCreation(), null, null);
         ResponseEntity<PlaylistResponse> response = playlistController.getPlaylistById(idPlaylist);
-        response.getBody().setCountVideos(null);
+        PlaylistResponse expected = new PlaylistResponse(idPlaylist, playlist.getNamePlaylist(),
+                playlist.getDateCreation(),  response.getBody().getCountVideos());
         assertEquals(expected, response.getBody());
     }
 
@@ -161,7 +162,7 @@ class PlaylistControllerTest {
     @NotNull
     private List<PlaylistWithVideosResponse> getPlaylistWithVideosResponses(Video video, Timestamp date) {
         PreviewVideoResponse previewVideoResponse = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
-                video.getDuration(), video.getDescription(), null, video.getReleaseDateTime(),
+                video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 null, video.getUser().getIdUser(), video.getUser().getChannelName());
         PlaylistWithVideosResponse playlistWithVideosResponse =
                 new PlaylistWithVideosResponse(previewVideoResponse, date);

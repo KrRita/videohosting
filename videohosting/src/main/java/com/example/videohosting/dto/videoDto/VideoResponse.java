@@ -29,7 +29,6 @@ public class VideoResponse {
     @Past
     private Timestamp releaseDateTime;
 
-    private Resource videoFile;
     @NotEmpty
     private List<String> categories;
     @NotNull
@@ -44,7 +43,7 @@ public class VideoResponse {
 
     public VideoResponse(Long idVideo, PreviewUserResponse previewUserResponse, String name,
                          Long duration, String description, Timestamp releaseDateTime,
-                         Resource videoFile, List<String> categories, Long countViewing, Long countLikes,
+                         List<String> categories, Long countViewing, Long countLikes,
                          Long countDislikes) {
         this.idVideo = idVideo;
         this.previewUserResponse = previewUserResponse;
@@ -52,7 +51,6 @@ public class VideoResponse {
         this.duration = duration;
         this.description = description;
         this.releaseDateTime = releaseDateTime;
-        this.videoFile = videoFile;
         this.categories = categories;
         this.countViewing = countViewing;
         this.countLikes = countLikes;
@@ -110,14 +108,6 @@ public class VideoResponse {
         this.releaseDateTime = releaseDateTime;
     }
 
-    public Resource getVideoFile() {
-        return videoFile;
-    }
-
-    public void setVideoFile(Resource videoFile) {
-        this.videoFile = videoFile;
-    }
-
     public List<String> getCategories() {
         return categories;
     }
@@ -165,7 +155,6 @@ public class VideoResponse {
         if (!Objects.equals(description, that.description)) return false;
         if (!Objects.equals(releaseDateTime, that.releaseDateTime))
             return false;
-        if (!Objects.equals(videoFile, that.videoFile)) return false;
         if (!Objects.equals(categories, that.categories)) return false;
         if (!Objects.equals(countViewing, that.countViewing)) return false;
         if (!Objects.equals(countLikes, that.countLikes)) return false;
@@ -180,7 +169,6 @@ public class VideoResponse {
         result = 31 * result + (duration != null ? duration.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (releaseDateTime != null ? releaseDateTime.hashCode() : 0);
-        result = 31 * result + (videoFile != null ? videoFile.hashCode() : 0);
         result = 31 * result + (categories != null ? categories.hashCode() : 0);
         result = 31 * result + (countViewing != null ? countViewing.hashCode() : 0);
         result = 31 * result + (countLikes != null ? countLikes.hashCode() : 0);
@@ -197,7 +185,6 @@ public class VideoResponse {
                ", duration=" + duration +
                ", description='" + description + '\'' +
                ", releaseDateTime=" + releaseDateTime +
-               ", url='" + videoFile + '\'' +
                ", categories=" + categories +
                ", countViewing=" + countViewing +
                ", countLikes=" + countLikes +

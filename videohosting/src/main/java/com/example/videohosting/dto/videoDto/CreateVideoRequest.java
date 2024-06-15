@@ -18,18 +18,13 @@ public class CreateVideoRequest {
     @NotBlank
     @Size(max = 1000)
     private String description;
-    private MultipartFile videoFile;
-    private MultipartFile previewImage;
     @NotEmpty
     private List<String> categories;
 
-    public CreateVideoRequest(Long idUser, String name, String description, MultipartFile videoFile,
-                              MultipartFile previewImage, List<String> categories) {
+    public CreateVideoRequest(Long idUser, String name, String description, List<String> categories) {
         this.idUser = idUser;
         this.name = name;
         this.description = description;
-        this.videoFile = videoFile;
-        this.previewImage = previewImage;
         this.categories = categories;
     }
 
@@ -61,22 +56,6 @@ public class CreateVideoRequest {
         this.name = name;
     }
 
-    public MultipartFile getVideoFile() {
-        return videoFile;
-    }
-
-    public void setVideoFile(MultipartFile videoFile) {
-        this.videoFile = videoFile;
-    }
-
-    public MultipartFile getPreviewImage() {
-        return previewImage;
-    }
-
-    public void setPreviewImage(MultipartFile previewImage) {
-        this.previewImage = previewImage;
-    }
-
     public List<String> getCategories() {
         return categories;
     }
@@ -95,8 +74,6 @@ public class CreateVideoRequest {
         if (!Objects.equals(idUser, that.idUser)) return false;
         if (!Objects.equals(name, that.name)) return false;
         if (!Objects.equals(description, that.description)) return false;
-        if (!Objects.equals(videoFile, that.videoFile)) return false;
-        if (!Objects.equals(previewImage, that.previewImage)) return false;
         return Objects.equals(categories, that.categories);
     }
 
@@ -105,8 +82,6 @@ public class CreateVideoRequest {
         int result = idUser != null ? idUser.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (videoFile != null ? videoFile.hashCode() : 0);
-        result = 31 * result + (previewImage != null ? previewImage.hashCode() : 0);
         result = 31 * result + (categories != null ? categories.hashCode() : 0);
         return result;
     }
@@ -117,8 +92,6 @@ public class CreateVideoRequest {
                "idUser=" + idUser +
                ", name='" + name + '\'' +
                ", description='" + description + '\'' +
-               ", url='" + videoFile + '\'' +
-               ", previewImage='" + previewImage + '\'' +
                ", categories=" + categories +
                '}';
     }

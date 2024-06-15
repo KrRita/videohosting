@@ -7,7 +7,6 @@ import com.example.videohosting.dto.userDto.UpdateUserRequest;
 import com.example.videohosting.dto.userDto.UserResponse;
 import com.example.videohosting.dto.videoDto.PreviewVideoResponse;
 import com.example.videohosting.dto.viewedVideoDto.ViewedVideoResponse;
-import com.example.videohosting.exception.LoadFileException;
 import com.example.videohosting.mapper.PlaylistMapper;
 import com.example.videohosting.mapper.VideoMapper;
 import com.example.videohosting.mapper.ViewedVideoMapper;
@@ -16,13 +15,14 @@ import com.example.videohosting.model.PlaylistModel;
 import com.example.videohosting.model.UserModel;
 import com.example.videohosting.model.VideoModel;
 import com.example.videohosting.model.ViewedVideoModel;
-import com.example.videohosting.service.MediaService;
 import com.example.videohosting.service.UserService;
 import com.example.videohosting.service.VideoService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,35 +49,37 @@ public class UserController {
     private final VideoMapper videoMapper;
     private final ViewedVideoMapper viewedVideoMapper;
     private final PlaylistMapper playlistMapper;
-    private final MediaService mediaService;
 
     @Autowired
     public UserController(UserService userService, UserMapper userMapper, VideoService videoService,
                           VideoMapper videoMapper, ViewedVideoMapper viewedVideoMapper,
-                          PlaylistMapper playlistMapper, MediaService mediaService) {
+                          PlaylistMapper playlistMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
         this.videoService = videoService;
         this.videoMapper = videoMapper;
         this.viewedVideoMapper = viewedVideoMapper;
         this.playlistMapper = playlistMapper;
-        this.mediaService = mediaService;
     }
 
-    @PutMapping()
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    public ResponseEntity<UserResponse> putUser(@Valid @RequestBody UpdateUserRequest request,
-                                                Authentication authentication) {
-        UserModel model = userMapper.toModelFromUpdateRequest(request);
+    public ResponseEntity<UserResponse> putUser(
+            @Valid @RequestPart(value = "request", required = true) String request,
+            @RequestPart(value = "icon", required = true) MultipartFile icon,
+            @RequestPart(value = "header", required = true) MultipartFile header ,
+            Authentication authentication) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        UpdateUserRequest updateUserRequest = objectMapper.readValue(request, UpdateUserRequest.class);
+        UserModel model = userMapper.toModelFromUpdateRequest(updateUserRequest);
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         model.setIdUser(id);
-        UserModel userModel = userService.update(model, request.getImageHeader(), request.getImageIcon());
+        UserModel userModel = userService.update(model, header, icon);
         UserResponse response = userMapper.toResponseFromModel(userModel);
-        addIconAndHeader(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping()
+    @PostMapping("/subscription")
     @Transactional
     public ResponseEntity<UserResponse> postSubscription
             (@Valid @RequestBody UpdateSubscriptionsRequest request, Authentication authentication) {
@@ -88,7 +92,6 @@ public class UserController {
         model.setSubscriptions(subscriptions);
         UserModel userModel = userService.addSubscription(model);
         UserResponse response = userMapper.toResponseFromModel(userModel);
-        addIconAndHeader(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -101,7 +104,6 @@ public class UserController {
         model.setIdUser(id);
         UserModel userModel = userService.deleteSubscription(model);
         UserResponse response = userMapper.toResponseFromModel(userModel);
-        addIconAndHeader(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -117,7 +119,6 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         UserModel model = userService.findUserById(id);
         UserResponse response = userMapper.toResponseFromModel(model);
-        addIconAndHeader(response);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -128,15 +129,6 @@ public class UserController {
         UserModel user = userService.findUserById(id);
         List<UserModel> subscriptions = user.getSubscriptions();
         List<PreviewUserResponse> responses = userMapper.toPreviewUserResponseListFromModelUserList(subscriptions);
-        for (PreviewUserResponse response : responses) {
-            String iconPath = "imageIconUser\\" + response.getIdUser() + ".jpeg";
-            try {
-                Resource icon = mediaService.getMedia(iconPath);
-                response.setImageIcon(icon);
-            } catch (LoadFileException ex) {
-                response.setImageIcon(null);
-            }
-        }
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -147,7 +139,6 @@ public class UserController {
         UserModel user = userService.findUserById(id);
         List<VideoModel> videos = user.getVideos();
         List<PreviewVideoResponse> responses = videoMapper.toListPreviewVideoResponseFromListModel(videos);
-        addVideoPreview(responses);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -157,7 +148,6 @@ public class UserController {
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         List<VideoModel> videos = videoService.getSubscriptionsVideos(id);
         List<PreviewVideoResponse> responses = videoMapper.toListPreviewVideoResponseFromListModel(videos);
-        addVideoPreview(responses);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -166,15 +156,6 @@ public class UserController {
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         List<ViewedVideoModel> models = videoService.getViewedVideos(id);
         List<ViewedVideoResponse> responses = viewedVideoMapper.toResponseListFromModelList(models);
-        for (ViewedVideoResponse response : responses) {
-            String videoPreview = "previewVideo\\" + response.getPreviewVideoResponse().getIdVideo() + ".jpeg";
-            try {
-                Resource preview = mediaService.getMedia(videoPreview);
-                response.getPreviewVideoResponse().setPreviewImage(preview);
-            } catch (LoadFileException ex) {
-                response.getPreviewVideoResponse().setPreviewImage(null);
-            }
-        }
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -183,7 +164,6 @@ public class UserController {
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         List<VideoModel> models = videoService.getLikedVideos(id);
         List<PreviewVideoResponse> responses = videoMapper.toListPreviewVideoResponseFromListModel(models);
-        addVideoPreview(responses);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -193,45 +173,7 @@ public class UserController {
         UserModel user = userService.findUserById(id);
         List<PlaylistModel> models = user.getPlaylists();
         List<PlaylistResponse> responses = playlistMapper.toPlaylistResponseListFromPlaylistModelList(models);
-        for (PlaylistResponse response : responses) {
-            String iconPlaylist = "imageIconPlaylist\\" + response.getIdPlaylist() + ".jpeg";
-            try {
-                Resource icon = mediaService.getMedia(iconPlaylist);
-                response.setImageIcon(icon);
-            } catch (LoadFileException ex) {
-                response.setImageIcon(null);
-            }
-        }
         return ResponseEntity.status(HttpStatus.OK).body(responses);
-    }
-
-    private void addIconAndHeader(UserResponse response) {
-        String headerPath = "imageHeaderUser\\" + response.getIdUser() + ".jpeg";
-        String iconPath = "imageIconUser\\" + response.getIdUser() + ".jpeg";
-        try {
-            Resource header = mediaService.getMedia(headerPath);
-            response.setImageHeader(header);
-        } catch (LoadFileException ex) {
-            response.setImageHeader(null);
-        }
-        try {
-            Resource icon = mediaService.getMedia(iconPath);
-            response.setImageIcon(icon);
-        } catch (LoadFileException ex) {
-            response.setImageIcon(null);
-        }
-    }
-
-    private void addVideoPreview(List<PreviewVideoResponse> responses) {
-        for (PreviewVideoResponse response : responses) {
-            String videoPreview = "previewVideo\\" + response.getIdVideo() + ".jpeg";
-            try {
-                Resource preview = mediaService.getMedia(videoPreview);
-                response.setPreviewImage(preview);
-            } catch (LoadFileException ex) {
-                response.setPreviewImage(null);
-            }
-        }
     }
 
 }

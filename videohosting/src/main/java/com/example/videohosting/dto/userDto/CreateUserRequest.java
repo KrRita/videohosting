@@ -14,20 +14,15 @@ public class CreateUserRequest {
     @NotBlank
     @Size(max = 40)
     private String channelName;
-    private MultipartFile imageIcon;
-    private MultipartFile imageHeader;
     @NotBlank
     @Size(max = 1000)
     private String description;
     @NotBlank
     private String password;
 
-    public CreateUserRequest(String email, String channelName, MultipartFile imageIcon, MultipartFile imageHeader,
-                             String description, String password) {
+    public CreateUserRequest(String email, String channelName, String description, String password) {
         this.email = email;
         this.channelName = channelName;
-        this.imageIcon = imageIcon;
-        this.imageHeader = imageHeader;
         this.description = description;
         this.password = password;
     }
@@ -50,23 +45,6 @@ public class CreateUserRequest {
     public void setChannelName(String channelName) {
         this.channelName = channelName;
     }
-
-    public MultipartFile getImageIcon() {
-        return imageIcon;
-    }
-
-    public void setImageIcon(MultipartFile imageIcon) {
-        this.imageIcon = imageIcon;
-    }
-
-    public MultipartFile getImageHeader() {
-        return imageHeader;
-    }
-
-    public void setImageHeader(MultipartFile imageHeader) {
-        this.imageHeader = imageHeader;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -92,8 +70,6 @@ public class CreateUserRequest {
 
         if (!email.equals(that.email)) return false;
         if (!channelName.equals(that.channelName)) return false;
-        if (!Objects.equals(imageIcon, that.imageIcon)) return false;
-        if (!Objects.equals(imageHeader, that.imageHeader)) return false;
         if (!description.equals(that.description)) return false;
         return password.equals(that.password);
     }
@@ -102,8 +78,6 @@ public class CreateUserRequest {
     public int hashCode() {
         int result = email.hashCode();
         result = 31 * result + channelName.hashCode();
-        result = 31 * result + (imageIcon != null ? imageIcon.hashCode() : 0);
-        result = 31 * result + (imageHeader != null ? imageHeader.hashCode() : 0);
         result = 31 * result + description.hashCode();
         result = 31 * result + password.hashCode();
         return result;
@@ -114,8 +88,6 @@ public class CreateUserRequest {
         return "CreateUserRequest{" +
                "email='" + email + '\'' +
                ", name='" + channelName + '\'' +
-               ", imageIcon='" + imageIcon + '\'' +
-               ", imageHeader='" + imageHeader + '\'' +
                ", description='" + description + '\'' +
                ", password='" + password + '\'' +
                '}';

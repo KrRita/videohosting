@@ -5,6 +5,8 @@ import com.example.videohosting.dto.userDto.CreateUserRequest;
 import com.example.videohosting.dto.userDto.UserLogInRequest;
 import com.example.videohosting.exception.UserAlreadyExistsException;
 import com.example.videohosting.utils.UserUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SpringBootTest
 @Testcontainers
@@ -39,6 +42,7 @@ class JwtAuthorizationControllerTest {
     private JwtAuthorizationController jwtAuthorizationController;
     @Autowired
     private UserUtils userUtils;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @AfterEach
     public void tearDown() {
@@ -46,36 +50,38 @@ class JwtAuthorizationControllerTest {
     }
 
     @Test
-    void signUp() {
+    void signUp() throws JsonProcessingException {
         String email = "email@mail.ru";
-        CreateUserRequest request = new CreateUserRequest(email, "test", null,
-                null, "test", "test");
-        ResponseEntity<JwtResponse> response = jwtAuthorizationController.signUp(request);
-        assertEquals(email, response.getBody().getEmail());
+        CreateUserRequest request = new CreateUserRequest(email, "test", "test", "test");
+        String stringRequest = objectMapper.writeValueAsString(request);
+        JwtResponse response = jwtAuthorizationController.signUp(stringRequest,null,null).getBody();
+        assert response != null;
+        assertEquals(email, response.getEmail());
     }
 
     @Test
-    void signUpNegativeTest() {
+    void signUpNegativeTest() throws JsonProcessingException {
         String email = "email@mail.ru";
-        CreateUserRequest request = new CreateUserRequest(email, "test", null,
-                null, "test", "test");
-        jwtAuthorizationController.signUp(request);
-        CreateUserRequest failRequest = new CreateUserRequest(email, "CAT", null,
-                null, "CAT", "CAT");
-        assertThrows(UserAlreadyExistsException.class, () -> jwtAuthorizationController.signUp(failRequest));
+        CreateUserRequest request = new CreateUserRequest(email, "test", "test", "test");
+        String stringRequest = objectMapper.writeValueAsString(request);
+        jwtAuthorizationController.signUp(stringRequest,null,null);
+        CreateUserRequest failRequest = new CreateUserRequest(email, "CAT", "CAT", "CAT");
+        String newStringRequest = objectMapper.writeValueAsString(failRequest);
+        assertThrows(UserAlreadyExistsException.class, () -> jwtAuthorizationController.signUp(newStringRequest,null,null));
     }
 
 
     @Test
-    void logIn() {
+    void logIn() throws JsonProcessingException {
         String email = "email@mail.ru";
         String password ="password";
-        CreateUserRequest createRequest = new CreateUserRequest(email, "test", null,
-                null, "test", password);
-        jwtAuthorizationController.signUp(createRequest);
+        CreateUserRequest createRequest = new CreateUserRequest(email, "test", "test", password);
+        String stringRequest = objectMapper.writeValueAsString(createRequest);
+        jwtAuthorizationController.signUp(stringRequest,null,null);
         UserLogInRequest request = new UserLogInRequest(email, password);
-        ResponseEntity<JwtResponse> response = jwtAuthorizationController.logIn(request);
-        assertEquals(email, response.getBody().getEmail());
+        JwtResponse response = jwtAuthorizationController.logIn(request).getBody();
+        assert response != null;
+        assertEquals(email, response.getEmail());
     }
 
     @Test

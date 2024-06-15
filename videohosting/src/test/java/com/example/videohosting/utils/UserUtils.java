@@ -5,6 +5,8 @@ import com.example.videohosting.dto.jwtResponse.JwtResponse;
 import com.example.videohosting.dto.userDto.CreateUserRequest;
 import com.example.videohosting.entity.User;
 import com.example.videohosting.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -48,10 +50,11 @@ public class UserUtils {
         return subscription;
     }
 
-    public CreateUserRequest signUp() {
-        CreateUserRequest request = new CreateUserRequest("user123@example.com", "Channel523",
-                null, null, "Test Description123", "password512");
-        jwtAuthorizationController.signUp(request);
+    public CreateUserRequest signUp() throws JsonProcessingException {
+        CreateUserRequest request = new CreateUserRequest("user123@example.com", "Channel523", "Test Description123", "password512");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String stringRequest = objectMapper.writeValueAsString(request);
+        jwtAuthorizationController.signUp(stringRequest,null,null);
         return request;
     }
 

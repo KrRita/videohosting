@@ -22,6 +22,8 @@ import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.VideoRepository;
 import com.example.videohosting.repository.ViewedVideoRepository;
 import com.example.videohosting.utils.UserUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +78,7 @@ class UserControllerTest {
     private ViewedVideoRepository viewedVideoRepository;
     @Autowired
     private AssessmentVideoRepository assessmentVideoRepository;
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @AfterEach
     public void tearDown() {
@@ -84,24 +86,24 @@ class UserControllerTest {
     }
 
     @Test
-    void putUser() {
+    void putUser() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
         String channelName = "cat";
-        UpdateUserRequest request = new UpdateUserRequest(
-                channelName, null, null, null, null);
-        UserResponse response = userController.putUser(request, authentication).getBody();
+        UpdateUserRequest request = new UpdateUserRequest(channelName,  null, null);
+        String stringRequest = objectMapper.writeValueAsString(request);
+        UserResponse response = userController.putUser(stringRequest, null,null, authentication).getBody();
+        assert response != null;
         UserResponse expected = new UserResponse(response.getIdUser(), createUserRequest.getEmail(),
-                channelName, null, null,
-                createUserRequest.getDescription(), response.getDateOfRegistration(),
+                channelName, createUserRequest.getDescription(), response.getDateOfRegistration(),
                 response.getCountSubscribers());
         assertEquals(expected, response);
     }
 
 
     @Test
-    void postSubscription() {
+    void postSubscription() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -113,7 +115,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteSubscription() {
+    void deleteSubscription() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -126,7 +128,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUser() {
+    void deleteUser() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -135,21 +137,20 @@ class UserControllerTest {
     }
 
     @Test
-    void getUserById() {
+    void getUserById() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         UserResponse response = userController.getUserById(id).getBody();
         UserResponse expected = new UserResponse(response.getIdUser(), createUserRequest.getEmail(),
-                createUserRequest.getChannelName(), null, null,
-                createUserRequest.getDescription(), response.getDateOfRegistration(),
+                createUserRequest.getChannelName(), createUserRequest.getDescription(), response.getDateOfRegistration(),
                 response.getCountSubscribers());
         assertEquals(expected, response);
     }
 
     @Test
-    void getUserByIdNegativeTest() {
+    void getUserByIdNegativeTest() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -159,7 +160,7 @@ class UserControllerTest {
 
 
     @Test
-    void getUserSubscriptions() {
+    void getUserSubscriptions() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -168,14 +169,14 @@ class UserControllerTest {
         userController.postSubscription(request, authentication);
         List<PreviewUserResponse> responses = userController.getUserSubscriptions(authentication).getBody();
         PreviewUserResponse expectedUser = new PreviewUserResponse(
-                subscription.getIdUser(), subscription.getChannelName(), null, 2L);
+                subscription.getIdUser(), subscription.getChannelName(), 2L);
         List<PreviewUserResponse> expectedList = new ArrayList<>();
         expectedList.add(expectedUser);
         assertEquals(expectedList, responses);
     }
 
     @Test
-    void getUserSubscriptionsEmptyList() {
+    void getUserSubscriptionsEmptyList() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -183,29 +184,9 @@ class UserControllerTest {
         assertEquals(List.of(), responses);
     }
 
-
-/*
     @Test
     @Transactional
-    void getUserVideos() {
-        CreateUserRequest createUserRequest = userUtils.signUp();
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
-        Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
-        Video video = createAndSaveVideoForUser(id);
-        List<PreviewVideoResponse> response = userController.getUserVideos(authentication).getBody();
-        PreviewVideoResponse previewVideoResponse = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
-                video.getDuration(), video.getDescription(), null, video.getReleaseDateTime(),
-                0L, id, createUserRequest.getChannelName());
-        List<PreviewVideoResponse> expected = new ArrayList<>();
-        expected.add(previewVideoResponse);
-        assertEquals(expected, response);
-    }
-*/
-
-    @Test
-    @Transactional
-    void getSubscriptionsVideos() {
+    void getSubscriptionsVideos() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -215,7 +196,7 @@ class UserControllerTest {
         Video video = createAndSaveVideoForUser(subscription.getIdUser());
         List<PreviewVideoResponse> response = userController.getSubscriptionsVideos(authentication).getBody();
         PreviewVideoResponse previewVideoResponse = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
-                video.getDuration(), video.getDescription(), null, video.getReleaseDateTime(),
+                video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 0L, subscription.getIdUser(), subscription.getChannelName());
         List<PreviewVideoResponse> expected = new ArrayList<>();
         expected.add(previewVideoResponse);
@@ -224,7 +205,7 @@ class UserControllerTest {
 
     @Test
     @Transactional
-    void getViewedVideos() {
+    void getViewedVideos() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -233,7 +214,7 @@ class UserControllerTest {
         createAndSaveViewedVideo(id, video);
         List<ViewedVideoResponse> responses = userController.getViewedVideos(authentication).getBody();
         PreviewVideoResponse previewVideoResponse = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
-                video.getDuration(), video.getDescription(), null, video.getReleaseDateTime(),
+                video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 1L, id, createUserRequest.getChannelName());
         ViewedVideoResponse expected = new ViewedVideoResponse(previewVideoResponse, responses.get(0).getDateOfViewing());
         assertEquals(expected, responses.get(0));
@@ -241,7 +222,7 @@ class UserControllerTest {
 
     @Test
     @Transactional
-    void getLikedVideos() {
+    void getLikedVideos() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -250,13 +231,13 @@ class UserControllerTest {
         createAndSaveAssessmentOnVideo(id, video);
         List<PreviewVideoResponse> response = userController.getLikedVideos(authentication).getBody();
         PreviewVideoResponse expected = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
-                video.getDuration(), video.getDescription(), null, video.getReleaseDateTime(),
+                video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 0L, id, createUserRequest.getChannelName());
         assertEquals(expected, response.get(0));
     }
 
     @Test
-    void getUserPlaylists() {
+    void getUserPlaylists() throws JsonProcessingException {
         CreateUserRequest createUserRequest = userUtils.signUp();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
@@ -264,7 +245,7 @@ class UserControllerTest {
         Playlist playlist = createAndSavePlaylistForUser(id);
         List<PlaylistResponse> responses = userController.getUserPlaylists(authentication).getBody();
         PlaylistResponse expected = new PlaylistResponse(playlist.getIdPlaylist(), playlist.getNamePlaylist(),
-                playlist.getDateCreation(), null, 0L);
+                playlist.getDateCreation(), 0L);
         assertEquals(expected, responses.get(0));
     }
 
