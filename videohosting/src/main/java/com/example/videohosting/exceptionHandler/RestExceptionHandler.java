@@ -16,13 +16,6 @@ import java.io.FileNotFoundException;
 @RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-/*
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> invalidArgumentExceptionHandler(MethodArgumentNotValidException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-    }
-*/
-
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> notFoundExceptionHandler(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(ex.getMessage());

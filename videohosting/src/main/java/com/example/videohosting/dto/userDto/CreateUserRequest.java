@@ -3,9 +3,6 @@ package com.example.videohosting.dto.userDto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Objects;
 
 public class CreateUserRequest {
     @Email

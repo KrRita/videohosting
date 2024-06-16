@@ -48,8 +48,7 @@ class PlaylistServiceTest {
 
     private PlaylistModel playlistModel;
     private Playlist playlist;
-    private User user;
-    private UserModel userModel;
+
 
     @BeforeEach
     public void setUp() {
@@ -57,7 +56,7 @@ class PlaylistServiceTest {
 
         Timestamp dateTime = Timestamp.valueOf(LocalDateTime.now());
 
-        userModel = new UserModel();
+        UserModel userModel = new UserModel();
         userModel.setIdUser(1L);
         userModel.setEmail("test@example.com");
         userModel.setChannelName("Test Channel");
@@ -65,7 +64,7 @@ class PlaylistServiceTest {
         userModel.setDateOfRegistration(dateTime);
         userModel.setPassword("password");
 
-        user = new User();
+        User user = new User();
         user.setIdUser(1L);
         user.setEmail("test@example.com");
         user.setChannelName("Test Channel");
@@ -123,7 +122,6 @@ class PlaylistServiceTest {
     @Test
     void updateNegativeTest() {
         Long idPlaylist = playlist.getIdPlaylist();
-        MultipartFile icon = null;
         String path = "imageIconPlaylist\\" + playlist.getIdPlaylist() + ".jpeg";
         when(playlistMapper.toEntity(playlistModel)).thenReturn(playlist);
         when(playlistRepository.findById(idPlaylist)).thenReturn(Optional.of(playlist));
@@ -131,10 +129,10 @@ class PlaylistServiceTest {
         when(playlistMapper.toModel(playlist)).thenReturn(playlistModel);
         when(playlistWithVideosRepository.countPlaylistWithVideosByIdPlaylist(idPlaylist)).thenReturn(0L);
 
-        PlaylistModel result = playlistService.update(playlistModel, icon);
+        PlaylistModel result = playlistService.update(playlistModel, null);
 
         assertEquals(playlistModel, result);
-        verify(mediaService, never()).saveMedia(icon, path);
+        verify(mediaService, never()).saveMedia(null, path);
     }
 
 

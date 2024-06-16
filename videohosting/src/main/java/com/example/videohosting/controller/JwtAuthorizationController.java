@@ -1,13 +1,11 @@
 package com.example.videohosting.controller;
 
+import com.example.videohosting.config.jwtConfig.JwtUtils;
 import com.example.videohosting.dto.jwtResponse.JwtResponse;
-import com.example.videohosting.dto.playlistDto.CreatePlaylistRequest;
 import com.example.videohosting.dto.userDto.CreateUserRequest;
 import com.example.videohosting.dto.userDto.UserLogInRequest;
-import com.example.videohosting.config.jwtConfig.JwtUtils;
 import com.example.videohosting.mapper.userMapper.UserMapper;
 import com.example.videohosting.model.UserModel;
-import com.example.videohosting.service.MediaService;
 import com.example.videohosting.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,8 +35,7 @@ public class JwtAuthorizationController {
 
     @Autowired
     public JwtAuthorizationController(UserService userService, UserMapper userMapper,
-                                      AuthenticationManager authenticationManager, JwtUtils jwtUtils,
-                                      MediaService mediaService) {
+                                      AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
         this.userService = userService;
         this.userMapper = userMapper;
         this.authenticationManager = authenticationManager;

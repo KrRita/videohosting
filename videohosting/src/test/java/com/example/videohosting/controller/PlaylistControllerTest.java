@@ -110,10 +110,11 @@ class PlaylistControllerTest {
     void getPlaylistById() {
         Playlist playlist = playlistUtils.createAndSavePlaylist();
         Long idPlaylist = playlist.getIdPlaylist();
-        ResponseEntity<PlaylistResponse> response = playlistController.getPlaylistById(idPlaylist);
+        PlaylistResponse response = playlistController.getPlaylistById(idPlaylist).getBody();
+        assert response != null;
         PlaylistResponse expected = new PlaylistResponse(idPlaylist, playlist.getNamePlaylist(),
-                playlist.getDateCreation(),  response.getBody().getCountVideos());
-        assertEquals(expected, response.getBody());
+                playlist.getDateCreation(),  response.getCountVideos());
+        assertEquals(expected, response);
     }
 
     @Test
@@ -129,10 +130,11 @@ class PlaylistControllerTest {
         Long idPlaylist = playlistWithVideos.getIdPlaylist();
         List<PlaylistWithVideosResponse> expected =
                 getPlaylistWithVideosResponses(video, playlistWithVideos.getDateOfAddition());
-        ResponseEntity<List<PlaylistWithVideosResponse>> response =
-                playlistController.getVideosFromPlaylist(idPlaylist);
-        response.getBody().get(0).getPreviewVideoResponse().setCountViewing(null);
-        assertEquals(expected, response.getBody());
+        List<PlaylistWithVideosResponse> response =
+                playlistController.getVideosFromPlaylist(idPlaylist).getBody();
+        assert response != null;
+        response.get(0).getPreviewVideoResponse().setCountViewing(null);
+        assertEquals(expected, response);
     }
 
     @Test
@@ -141,11 +143,12 @@ class PlaylistControllerTest {
         Video video = videoUtils.createAndSaveVideo();
         CreatePlaylistWithVideosRequest request = new CreatePlaylistWithVideosRequest(video.getIdVideo());
         List<PlaylistWithVideosResponse> expected = getPlaylistWithVideosResponses(video, null);
-        ResponseEntity<List<PlaylistWithVideosResponse>> response =
-                playlistController.addVideoInPlaylist(playlist.getIdPlaylist(), request);
-        response.getBody().get(0).getPreviewVideoResponse().setCountViewing(null);
-        response.getBody().get(0).setDateOfAddition(null);
-        assertEquals(expected, response.getBody());
+        List<PlaylistWithVideosResponse> response =
+                playlistController.addVideoInPlaylist(playlist.getIdPlaylist(), request).getBody();
+        assert response != null;
+        response.get(0).getPreviewVideoResponse().setCountViewing(null);
+        response.get(0).setDateOfAddition(null);
+        assertEquals(expected, response);
     }
 
     @Test

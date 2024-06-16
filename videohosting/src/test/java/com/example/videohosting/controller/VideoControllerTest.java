@@ -149,6 +149,7 @@ class VideoControllerTest {
         PreviewVideoResponse expected = new PreviewVideoResponse(video.getIdVideo(), name,
                 video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 0L, video.getUser().getIdUser(), video.getUser().getChannelName());
+        assert responses != null;
         assertEquals(expected, responses.get(0));
     }
 
@@ -169,6 +170,7 @@ class VideoControllerTest {
         PreviewVideoResponse expected = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
                 video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 0L, video.getUser().getIdUser(), userName);
+        assert responses != null;
         assertEquals(expected, responses.get(0));
 
     }
@@ -191,12 +193,12 @@ class VideoControllerTest {
         PreviewVideoResponse expected = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
                 video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 0L, video.getUser().getIdUser(), video.getUser().getChannelName());
+        assert responses != null;
         assertEquals(expected, responses.get(0));
     }
 
     @Test
     void getVideosByCategoriesNegativeTest() {
-        Video video = videoUtils.createAndSaveVideo();
         List<String> categories = new ArrayList<>();
         categories.add("Dogs");
         List<PreviewVideoResponse> responses = videoController.getVideosByCategories(categories).getBody();
@@ -269,6 +271,7 @@ class VideoControllerTest {
         List<CommentResponse> responses = videoController.getCommentsOnTheVideo(video.getIdVideo()).getBody();
         CommentResponse expected = new CommentResponse(comment.getIdComment(), user.getIdUser(),
                 user.getChannelName(), text, comment.getReleaseDateTime(), 0L, 0L);
+        assert responses != null;
         assertEquals(expected, responses.get(0));
     }
 

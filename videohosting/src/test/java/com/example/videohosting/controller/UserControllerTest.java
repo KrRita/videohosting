@@ -111,6 +111,7 @@ class UserControllerTest {
         UpdateSubscriptionsRequest request = new UpdateSubscriptionsRequest(subscription.getIdUser());
         userController.postSubscription(request, authentication);
         UserResponse result = userController.getUserById(subscription.getIdUser()).getBody();
+        assert result != null;
         assertEquals(2L, result.getCountSubscribers());
     }
 
@@ -124,6 +125,7 @@ class UserControllerTest {
         userController.postSubscription(request, authentication);
         userController.deleteSubscription(request, authentication);
         UserResponse result = userController.getUserById(subscription.getIdUser()).getBody();
+        assert result != null;
         assertEquals(1L, result.getCountSubscribers());
     }
 
@@ -143,6 +145,7 @@ class UserControllerTest {
                 new UsernamePasswordAuthenticationToken(createUserRequest.getEmail(), createUserRequest.getPassword()));
         Long id = ((UserModel) authentication.getPrincipal()).getIdUser();
         UserResponse response = userController.getUserById(id).getBody();
+        assert response != null;
         UserResponse expected = new UserResponse(response.getIdUser(), createUserRequest.getEmail(),
                 createUserRequest.getChannelName(), createUserRequest.getDescription(), response.getDateOfRegistration(),
                 response.getCountSubscribers());
@@ -216,6 +219,7 @@ class UserControllerTest {
         PreviewVideoResponse previewVideoResponse = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
                 video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 1L, id, createUserRequest.getChannelName());
+        assert responses != null;
         ViewedVideoResponse expected = new ViewedVideoResponse(previewVideoResponse, responses.get(0).getDateOfViewing());
         assertEquals(expected, responses.get(0));
     }
@@ -233,6 +237,7 @@ class UserControllerTest {
         PreviewVideoResponse expected = new PreviewVideoResponse(video.getIdVideo(), video.getName(),
                 video.getDuration(), video.getDescription(), video.getReleaseDateTime(),
                 0L, id, createUserRequest.getChannelName());
+        assert response != null;
         assertEquals(expected, response.get(0));
     }
 
@@ -246,6 +251,7 @@ class UserControllerTest {
         List<PlaylistResponse> responses = userController.getUserPlaylists(authentication).getBody();
         PlaylistResponse expected = new PlaylistResponse(playlist.getIdPlaylist(), playlist.getNamePlaylist(),
                 playlist.getDateCreation(), 0L);
+        assert responses != null;
         assertEquals(expected, responses.get(0));
     }
 

@@ -8,7 +8,6 @@ import com.example.videohosting.repository.UserRepository;
 import com.example.videohosting.repository.VideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

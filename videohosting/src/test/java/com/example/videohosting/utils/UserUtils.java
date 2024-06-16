@@ -1,14 +1,12 @@
 package com.example.videohosting.utils;
 
 import com.example.videohosting.controller.JwtAuthorizationController;
-import com.example.videohosting.dto.jwtResponse.JwtResponse;
 import com.example.videohosting.dto.userDto.CreateUserRequest;
 import com.example.videohosting.entity.User;
 import com.example.videohosting.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;

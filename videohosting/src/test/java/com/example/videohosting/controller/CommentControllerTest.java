@@ -59,12 +59,12 @@ class CommentControllerTest {
         Long idVideo = video.getIdVideo();
         String text = "cat";
         CreateCommentRequest request = new CreateCommentRequest(idVideo, idUser, text);
-        ResponseEntity<CommentResponse> response = commentController.postComment(request);
-        response.getBody().setIdComment(null);
-        response.getBody().setReleaseDateTime(null);
-        CommentResponse expected = new CommentResponse(null, idUser, video.getUser().getChannelName(), text,
-                null, 0L, 0L);
-        assertEquals(expected, response.getBody());
+        CommentResponse response = commentController.postComment(request).getBody();
+        assert response != null;
+        CommentResponse expected = new CommentResponse(response.getIdComment(), idUser,
+                video.getUser().getChannelName(), text, response.getReleaseDateTime(),
+                0L, 0L);
+        assertEquals(expected, response);
     }
 
     @Test
@@ -73,13 +73,12 @@ class CommentControllerTest {
         Long idComment = comment.getIdComment();
         String text = "New text";
         UpdateCommentRequest request = new UpdateCommentRequest(text);
-        ResponseEntity<CommentResponse> response = commentController.putComment(idComment, request);
-        response.getBody().setReleaseDateTime(null);
-        response.getBody().setCountDislikes(null);
-        response.getBody().setCountLikes(null);
+        CommentResponse response = commentController.putComment(idComment, request).getBody();
+        assert response != null;
         CommentResponse expected = new CommentResponse(idComment, comment.getUser().getIdUser(),
-                comment.getUser().getChannelName(), text, null, null, null);
-        assertEquals(expected, response.getBody());
+                comment.getUser().getChannelName(), text, response.getReleaseDateTime(),
+                response.getCountLikes(), response.getCountDislikes());
+        assertEquals(expected, response);
     }
 
     @Test
@@ -94,20 +93,19 @@ class CommentControllerTest {
     void getCommentById() {
         Comment comment = commentUtils.createAndSaveComment();
         Long idComment = comment.getIdComment();
-        ResponseEntity<CommentResponse> response = commentController.getCommentById(idComment);
-        response.getBody().setCountLikes(null);
-        response.getBody().setCountDislikes(null);
+        CommentResponse response = commentController.getCommentById(idComment).getBody();
+        assert response != null;
         CommentResponse expected = new CommentResponse(idComment, comment.getUser().getIdUser(),
                 comment.getUser().getChannelName(), comment.getText(), comment.getReleaseDateTime(),
-                null, null);
-        assertEquals(expected, response.getBody());
+                response.getCountLikes(), response.getCountDislikes());
+        assertEquals(expected, response);
     }
 
     @Test
     void getCommentByIdNegativeTest() {
         Comment comment = commentUtils.createAndSaveComment();
         Long idComment = comment.getIdComment() + 1;
-        assertThrows(NotFoundException.class,() -> commentController.getCommentById(idComment));
+        assertThrows(NotFoundException.class, () -> commentController.getCommentById(idComment));
     }
 
     @Test
@@ -116,12 +114,12 @@ class CommentControllerTest {
         Long idComment = comment.getIdComment();
         CreateAssessmentCommentRequest request =
                 new CreateAssessmentCommentRequest(comment.getUser().getIdUser(), true);
-        ResponseEntity<CommentResponse> response = commentController.postAssessmentComment(idComment, request);
-        response.getBody().setCountDislikes(null);
+        CommentResponse response = commentController.postAssessmentComment(idComment, request).getBody();
+        assert response != null;
         CommentResponse expected = new CommentResponse(idComment, comment.getUser().getIdUser(),
                 comment.getUser().getChannelName(), comment.getText(), comment.getReleaseDateTime(),
-                1L, null);
-        assertEquals(expected, response.getBody());
+                1L, response.getCountDislikes());
+        assertEquals(expected, response);
     }
 
     @Test
@@ -132,11 +130,11 @@ class CommentControllerTest {
                 new CreateAssessmentCommentRequest(comment.getUser().getIdUser(), false);
         commentController.postAssessmentComment(idComment, createRequest);
         DeleteAssessmentCommentRequest request = new DeleteAssessmentCommentRequest(comment.getUser().getIdUser());
-        ResponseEntity<CommentResponse> response = commentController.deleteAssessmentComment(idComment, request);
-        response.getBody().setCountLikes(null);
+        CommentResponse response = commentController.deleteAssessmentComment(idComment, request).getBody();
+        assert response != null;
         CommentResponse expected = new CommentResponse(idComment, comment.getUser().getIdUser(),
                 comment.getUser().getChannelName(), comment.getText(), comment.getReleaseDateTime(),
-                null, 0L);
-        assertEquals(expected, response.getBody());
+                response.getCountLikes(), 0L);
+        assertEquals(expected, response);
     }
 }

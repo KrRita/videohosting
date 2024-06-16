@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -165,8 +164,11 @@ class VideoServiceTest {
         videoSubscriptionModel.setIdVideo(2L);
         videoSubscriptionModel.setUser(userSubscriptionModel);
 
-        videos = Arrays.asList(videoSubscription);
-        videoModels = Arrays.asList(videoSubscriptionModel);
+        videos = new ArrayList<>();
+        videos.add(videoSubscription);
+
+        videoModels = new ArrayList<>();
+        videoModels.add(videoSubscriptionModel);
 
         subscription.setIdUser(1L);
         subscription.setVideos(videos);
@@ -175,9 +177,11 @@ class VideoServiceTest {
         userSubscriptionModel.setVideos(videoModels);
 
 
-        user.setSubscriptions(Arrays.asList(subscription));
-        userModel.setSubscriptions(Arrays.asList(userSubscriptionModel));
+        user.setSubscriptions(new ArrayList<>());
+        user.getSubscriptions().add(subscription);
 
+        userModel.setSubscriptions(new ArrayList<>());
+        userModel.getSubscriptions().add(userSubscriptionModel);
     }
 
     private void createAndSavePlaylist() {
@@ -208,6 +212,7 @@ class VideoServiceTest {
         when(videoServiceUtils.toCategoryEntityList(videoModel.getCategories())).thenReturn(new ArrayList<>());
         when(videoServiceUtils.toCategoryStringList(video.getCategories())).thenReturn(new ArrayList<>());
         when(userRepository.getSubscribersCountByIdUser(user.getIdUser())).thenReturn(0L);
+        when(userRepository.findById(video.getUser().getIdUser())).thenReturn(Optional.of(user));
         VideoModel savedVideoModel = videoService.insertVideo(videoModel, videoFile, previewImage);
         assertEquals(videoModel, savedVideoModel);
         verify(mediaService).saveMedia(previewImage, pathPreview);
@@ -464,7 +469,8 @@ class VideoServiceTest {
         assessmentVideo.setLiked(true);
         assessmentVideos.add(assessmentVideo);
 
-        when(assessmentVideoRepository.getAssessmentVideoByIdUserAndLiked(idUser, true)).thenReturn(assessmentVideos);
+        when(assessmentVideoRepository.getAssessmentVideoByIdUserAndLiked(idUser, true))
+                .thenReturn(assessmentVideos);
         when(videoServiceUtils.getVideoModelListWithCategories(any(List.class))).thenReturn(videoModels);
         when(videoServiceUtils.addFieldInModelList(videoModels)).thenReturn(videoModels);
 
