@@ -58,7 +58,7 @@ class AssessmentVideoRepositoryTest {
     @Transactional
     void getAssessmentVideoByIdUserAndLikedNegativeTest() {
         List<AssessmentVideo> result = repository.getAssessmentVideoByIdUserAndLiked(212L, true);
-        assertEquals(List.of(),result);
+        assertEquals(List.of(), result);
     }
 
 
@@ -79,7 +79,16 @@ class AssessmentVideoRepositoryTest {
 
     @Test
     void getAssessmentVideoByIdUserAndVideo_IdVideo() {
+        AssessmentVideo assessmentVideo = utils.createAndSaveAssessmentVideo();
+        Long id = repository.getAssessmentVideoByIdUserAndVideo_IdVideo(
+                assessmentVideo.getIdUser(), assessmentVideo.getVideo().getIdVideo());
+        assertEquals(assessmentVideo.getIdAssessmentVideo(), id);
+    }
+
+    @Test
+    void getAssessmentVideoByIdUserAndVideo_IdVideoNegativeTest() {
         Long id = repository.getAssessmentVideoByIdUserAndVideo_IdVideo(121L, 301L);
         assertNull(id);
     }
+
 }

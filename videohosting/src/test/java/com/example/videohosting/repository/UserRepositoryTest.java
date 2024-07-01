@@ -72,6 +72,14 @@ class UserRepositoryTest {
         assertEquals(2L, count);
     }
 
+    @Test
+    void getSubscriptionsCountByIdUserNegativeTest() {
+        User user = utils.createAndSaveUser();
+        Long count = userRepository.getSubscribersCountByIdUser(user.getIdUser() + 2L);
+        assertEquals(0L, count);
+    }
+
+
     @Transactional
     @Test
     void getUserByEmail() {
@@ -80,6 +88,7 @@ class UserRepositoryTest {
         User result = userRepository.getUserByEmail(email);
         assertEquals(user, result);
     }
+
     @Test
     void getUserByEmailNegativeTest() {
         User result = userRepository.getUserByEmail("cat@example.ru");
